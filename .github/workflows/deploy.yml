@@ -1,0 +1,38 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main # Sadece main branch'e kod pushlandığında çalışır
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}       # Sunucu IP adresi
+          username: ${{ secrets.VPS_USER }}   # Sunucu kullanıcı adı (örn: root veya ubuntu)
+          key: ${{ secrets.VPS_SSH_KEY }}     # SSH Private Key (Sunucuya şifresiz giriş için)
+          port: ${{ secrets.VPS_PORT }}       # SSH portu (genelde 22)
+          script: |
+            # Proje dizinine git (VPS'te bu dizini önceden oluşturmalısın)
+            cd /opt/localshop
+            
+            # GitHub'dan en güncel kodları çek
+            git checkout main
+            git pull origin main
+            
+            # Gerekirse .env dosyasını güvenli bir şekilde GitHub Secrets üzerinden oluştur
+            # (Bu adım opsiyoneldir, eğer VPS'te .env zaten varsa burası atlanabilir)
+            echo "DATABASE_URL=postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@db:5432/${{ secrets.DB_NAME }}" > .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+            
+            # Docker container'larını yeniden derle ve kesintisiz başlat
+            docker-compose up -d --build
+            
+            # Kullanılmayan eski Docker imajlarını temizle (sunucu diski dolmasın diye)
+            docker image prune -f

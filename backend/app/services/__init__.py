@@ -1,0 +1,2 @@
+# LocalShop services package
+

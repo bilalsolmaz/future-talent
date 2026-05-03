@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  /* Minimal Ana Palet & Canlı Aksanlar (Tailwind'in hazır mavi/amber/slate renklerine alias) */
+  --color-primary-50: var(--color-blue-50);
+  --color-primary-100: var(--color-blue-100);
+  --color-primary-200: var(--color-blue-200);
+  --color-primary-300: var(--color-blue-300);
+  --color-primary-400: var(--color-blue-400);
+  --color-primary-500: var(--color-blue-500);
+  --color-primary-600: var(--color-blue-600);
+  --color-primary-700: var(--color-blue-700);
+  --color-primary-800: var(--color-blue-800);
+  --color-primary-900: var(--color-blue-900);
+
+  --color-accent-400: var(--color-amber-400);
+  --color-accent-500: var(--color-amber-500);
+  --color-accent-600: var(--color-amber-600);
+
+  --color-surface-50: var(--color-slate-50);
+  --color-surface-100: var(--color-slate-100);
+  --color-surface-200: var(--color-slate-200);
+  --color-surface-300: var(--color-slate-300);
+  --color-surface-400: var(--color-slate-400);
+  --color-surface-500: var(--color-slate-500);
+  --color-surface-600: var(--color-slate-600);
+  --color-surface-700: var(--color-slate-700);
+  --color-surface-800: var(--color-slate-800);
+  --color-surface-900: var(--color-slate-900);
+
+  /* Fontlar - Modern ve Okunaklı */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  /* Gölgeler - Hafif ve Derinlik Hissi Veren */
+  --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-floating: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Base Styles */
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-50);
+    color: var(--color-surface-900);
+  }
+
+  body {
+    @apply antialiased selection:bg-primary-200 selection:text-primary-900;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-semibold tracking-tight text-surface-900;
+  }
+
+  /* Focus ring for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50;
+  }
+}
+
+/* Custom Utility Classes for Components */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-sm shadow-primary-500/20;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-surface-800 border border-surface-200 hover:bg-surface-50 shadow-sm;
+  }
+  
+  .btn-accent {
+    @apply bg-accent-500 text-white hover:bg-accent-600 shadow-sm shadow-accent-500/20;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-card border border-surface-100 overflow-hidden transition-all;
+  }
+  
+  .input-field {
+    @apply w-full rounded-lg border border-surface-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-surface-50 disabled:text-surface-500;
+  }
+}

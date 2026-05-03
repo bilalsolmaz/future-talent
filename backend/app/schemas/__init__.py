@@ -1,0 +1,2 @@
+# LocalShop schemas package
+
