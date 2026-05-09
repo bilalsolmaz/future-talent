@@ -23,14 +23,20 @@ const Cart = () => {
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
 
+  // Kupon state'leri
+  const [couponCode, setCouponCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponMsg, setCouponMsg] = useState({ type: '', text: '' });
+
   // Sipariş onay ekranı state'leri
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
   const [ibanCopied, setIbanCopied] = useState(false);
   const [orderNoCopied, setOrderNoCopied] = useState(false);
 
-  const shippingCost = totalPrice > 500 ? 0 : 39.9;
-  const grandTotal = totalPrice + shippingCost;
+  const shippingCost = (totalPrice - discountAmount) > 500 ? 0 : 39.9;
+  const grandTotal = Math.max(totalPrice - discountAmount, 0) + shippingCost;
 
   const handleCopyIban = () => {
     navigator.clipboard.writeText(IBAN_NO.replace(/\s/g, ''));
@@ -43,6 +49,31 @@ const Cart = () => {
     navigator.clipboard.writeText(confirmedOrder.siparis_no);
     setOrderNoCopied(true);
     setTimeout(() => setOrderNoCopied(false), 2000);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    try {
+      const res = await api.post('/kuponlar/uygula', { kod: couponCode.trim() }, { params: { sepet_tutari: totalPrice } });
+      if (res.data.gecerli) {
+        setDiscountAmount(res.data.indirim_tutari);
+        setAppliedCoupon(res.data.kupon_kodu);
+        setCouponMsg({ type: 'success', text: res.data.mesaj });
+      } else {
+        setCouponMsg({ type: 'error', text: res.data.mesaj });
+        setDiscountAmount(0);
+        setAppliedCoupon(null);
+      }
+    } catch (err) {
+      setCouponMsg({ type: 'error', text: 'Kupon uygulanamadı.' });
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode('');
+    setDiscountAmount(0);
+    setAppliedCoupon(null);
+    setCouponMsg({ type: '', text: '' });
   };
 
   const handleCheckout = async () => {
@@ -69,6 +100,11 @@ const Cart = () => {
           adet: item.quantity
         }))
       };
+      
+      // Kupon backend'de destekleniyorsa
+      if (appliedCoupon) {
+        orderData.kupon_kodu = appliedCoupon;
+      }
 
       const response = await api.post('/siparisler/', orderData);
       
@@ -364,14 +400,56 @@ const Cart = () => {
               <span>Ara Toplam ({totalItems} Ürün)</span>
               <span>₺{totalPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-green-600 font-medium">
+                <span>Kupon İndirimi</span>
+                <span>-₺{Number(discountAmount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between text-surface-600">
               <span>Kargo Ücreti</span>
-              {totalPrice > 500 ? (
+              {shippingCost === 0 ? (
                 <span className="text-green-600 font-medium">Ücretsiz</span>
               ) : (
-                <span>₺39.90</span>
+                <span>₺{shippingCost.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
               )}
             </div>
+          </div>
+          
+          {/* İndirim Kodu Alanı */}
+          <div className="mb-6 border-t border-surface-100 pt-4">
+            <label className="block text-sm font-semibold text-surface-700 mb-2">İndirim Kodu</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Kupon kodunuz"
+                className="input-field flex-1 text-sm uppercase"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                disabled={appliedCoupon}
+              />
+              {!appliedCoupon ? (
+                <button
+                  onClick={handleApplyCoupon}
+                  disabled={!couponCode.trim()}
+                  className="bg-surface-900 text-white px-4 rounded-lg text-sm font-semibold hover:bg-surface-800 disabled:opacity-50 transition-colors"
+                >
+                  Uygula
+                </button>
+              ) : (
+                <button
+                  onClick={handleRemoveCoupon}
+                  className="bg-red-50 text-red-600 px-4 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors"
+                >
+                  İptal
+                </button>
+              )}
+            </div>
+            {couponMsg.text && (
+              <p className={`text-xs mt-2 font-medium ${couponMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                {couponMsg.text}
+              </p>
+            )}
           </div>
           
           <div className="flex justify-between items-end border-t border-surface-100 pt-4 mb-6">

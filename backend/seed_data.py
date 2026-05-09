@@ -6,7 +6,9 @@ Mevcut veritabanına güncel e-ticaret kategorileri ve ürünleri ekler.
 import requests
 import sys
 
-BASE = "http://localhost:8000/api"
+import os
+
+BASE = os.getenv("API_BASE_URL", "http://localhost:8000/api")
 
 # Admin login
 def get_admin_token():
@@ -33,13 +35,21 @@ def seed():
     ]
 
     cat_map = {}
+    
+    # Mevcut kategorileri al
+    r_cats = requests.get(f"{BASE}/kategoriler/")
+    if r_cats.status_code == 200:
+        for c in r_cats.json():
+            cat_map[c["isim"]] = c["id"]
+
     for cat_name in categories:
-        r = requests.post(f"{BASE}/kategoriler/", json={"isim": cat_name}, headers=headers)
-        if r.status_code in (200, 201):
-            cat_map[cat_name] = r.json()["id"]
-            print(f"  ✅ Kategori: {cat_name} (ID: {cat_map[cat_name]})")
-        else:
-            print(f"  ⚠️ Kategori atlandı: {cat_name} — {r.text}")
+        if cat_name not in cat_map:
+            r = requests.post(f"{BASE}/kategoriler/", json={"isim": cat_name}, headers=headers)
+            if r.status_code in (200, 201):
+                cat_map[cat_name] = r.json()["id"]
+                print(f"  ✅ Kategori: {cat_name} (ID: {cat_map[cat_name]})")
+            else:
+                print(f"  ⚠️ Kategori atlandı: {cat_name} — {r.text}")
 
     # ─── ÜRÜNLER ───────────────────────────────────────────
     products = [
@@ -50,7 +60,8 @@ def seed():
             "fiyat": 74999.99,
             "stok": 25,
             "kategori": "Akıllı Telefonlar",
-            "resim_url": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600",
+            "ozellikler": {"Marka": "Apple", "Dahili Hafıza": "256 GB", "Renk": "Natürel Titanyum", "RAM Kapasitesi": "8 GB"}
         },
         {
             "isim": "Samsung Galaxy S24 Ultra",
@@ -58,7 +69,8 @@ def seed():
             "fiyat": 69999.99,
             "stok": 30,
             "kategori": "Akıllı Telefonlar",
-            "resim_url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600",
+            "ozellikler": {"Marka": "Samsung", "Dahili Hafıza": "512 GB", "Renk": "Titanyum Siyah", "RAM Kapasitesi": "12 GB"}
         },
         {
             "isim": "Xiaomi 14 Pro",
@@ -66,7 +78,8 @@ def seed():
             "fiyat": 34999.99,
             "stok": 40,
             "kategori": "Akıllı Telefonlar",
-            "resim_url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600",
+            "ozellikler": {"Marka": "Xiaomi", "Dahili Hafıza": "512 GB", "Renk": "Beyaz", "RAM Kapasitesi": "16 GB"}
         },
         {
             "isim": "Google Pixel 8 Pro",
@@ -74,7 +87,8 @@ def seed():
             "fiyat": 39999.99,
             "stok": 15,
             "kategori": "Akıllı Telefonlar",
-            "resim_url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600",
+            "ozellikler": {"Marka": "Google", "Dahili Hafıza": "128 GB", "Renk": "Mavi", "RAM Kapasitesi": "12 GB"}
         },
 
         # Bilgisayar & Tablet
@@ -84,7 +98,8 @@ def seed():
             "fiyat": 54999.99,
             "stok": 20,
             "kategori": "Bilgisayar & Tablet",
-            "resim_url": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600",
+            "ozellikler": {"Marka": "Apple", "İşlemci": "Apple M3", "RAM": "16 GB", "SSD Kapasitesi": "512 GB", "Ekran Boyutu": "15 inç"}
         },
         {
             "isim": "iPad Pro M4 11 inç",
@@ -92,7 +107,8 @@ def seed():
             "fiyat": 44999.99,
             "stok": 18,
             "kategori": "Bilgisayar & Tablet",
-            "resim_url": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600",
+            "ozellikler": {"Marka": "Apple", "İşletim Sistemi": "iPadOS", "Hafıza": "256 GB", "Ekran Boyutu": "11 inç"}
         },
         {
             "isim": "ASUS ROG Strix G16 Gaming Laptop",
@@ -100,7 +116,8 @@ def seed():
             "fiyat": 89999.99,
             "stok": 10,
             "kategori": "Bilgisayar & Tablet",
-            "resim_url": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600",
+            "ozellikler": {"Marka": "ASUS", "İşlemci": "Intel Core i9", "RAM": "32 GB", "SSD Kapasitesi": "1 TB", "Ekran Kartı": "Nvidia GeForce RTX 4070"}
         },
         {
             "isim": "Lenovo ThinkPad X1 Carbon Gen 12",
@@ -108,7 +125,8 @@ def seed():
             "fiyat": 62999.99,
             "stok": 12,
             "kategori": "Bilgisayar & Tablet",
-            "resim_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600",
+            "ozellikler": {"Marka": "Lenovo", "İşlemci": "Intel Core Ultra 7", "RAM": "16 GB", "SSD Kapasitesi": "512 GB", "Ekran Boyutu": "14 inç"}
         },
 
         # TV & Görüntü
@@ -118,7 +136,8 @@ def seed():
             "fiyat": 49999.99,
             "stok": 8,
             "kategori": "TV & Görüntü",
-            "resim_url": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600",
+            "ozellikler": {"Marka": "Samsung", "Çözünürlük": "4K Ultra HD", "Ekran Boyutu": "65 inç", "Görüntü Teknolojisi": "QLED"}
         },
         {
             "isim": "LG 55\" OLED C4 4K Smart TV",
@@ -126,7 +145,8 @@ def seed():
             "fiyat": 42999.99,
             "stok": 10,
             "kategori": "TV & Görüntü",
-            "resim_url": "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=600",
+            "ozellikler": {"Marka": "LG", "Çözünürlük": "4K Ultra HD", "Ekran Boyutu": "55 inç", "Görüntü Teknolojisi": "OLED"}
         },
         {
             "isim": "Sony PlayStation 5 Slim",
@@ -134,7 +154,8 @@ def seed():
             "fiyat": 18999.99,
             "stok": 35,
             "kategori": "TV & Görüntü",
-            "resim_url": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600",
+            "ozellikler": {"Marka": "Sony", "Depolama Kapasitesi": "825 GB", "Renk": "Beyaz"}
         },
 
         # Kulaklık & Ses Sistemleri
@@ -144,7 +165,8 @@ def seed():
             "fiyat": 9499.99,
             "stok": 50,
             "kategori": "Kulaklık & Ses Sistemleri",
-            "resim_url": "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600",
+            "ozellikler": {"Marka": "Apple", "Bağlantı Tipi": "Bluetooth", "Gürültü Engelleme": "Var", "Renk": "Beyaz"}
         },
         {
             "isim": "Sony WH-1000XM5",
@@ -152,7 +174,8 @@ def seed():
             "fiyat": 11999.99,
             "stok": 30,
             "kategori": "Kulaklık & Ses Sistemleri",
-            "resim_url": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600",
+            "ozellikler": {"Marka": "Sony", "Bağlantı Tipi": "Bluetooth", "Kullanım Tipi": "Kulaküstü", "Gürültü Engelleme": "Var"}
         },
         {
             "isim": "JBL Charge 5 Bluetooth Hoparlör",
@@ -160,7 +183,8 @@ def seed():
             "fiyat": 4999.99,
             "stok": 45,
             "kategori": "Kulaklık & Ses Sistemleri",
-            "resim_url": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600",
+            "ozellikler": {"Marka": "JBL", "Bağlantı Tipi": "Bluetooth", "Su Geçirmezlik": "Var", "Renk": "Siyah"}
         },
         {
             "isim": "Marshall Stanmore III",
@@ -168,7 +192,8 @@ def seed():
             "fiyat": 12499.99,
             "stok": 15,
             "kategori": "Kulaklık & Ses Sistemleri",
-            "resim_url": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600",
+            "ozellikler": {"Marka": "Marshall", "Bağlantı Tipi": "Bluetooth", "Renk": "Siyah"}
         },
 
         # Giyim & Moda
@@ -178,7 +203,8 @@ def seed():
             "fiyat": 3799.99,
             "stok": 60,
             "kategori": "Giyim & Moda",
-            "resim_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+            "ozellikler": {"Marka": "Nike", "Renk": "Beyaz", "Beden": "42", "Cinsiyet": "Unisex"}
         },
         {
             "isim": "Levi's 501 Original Fit Jean",
@@ -186,7 +212,8 @@ def seed():
             "fiyat": 2499.99,
             "stok": 80,
             "kategori": "Giyim & Moda",
-            "resim_url": "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=600",
+            "ozellikler": {"Marka": "Levi's", "Renk": "Mavi", "Beden": "32/32", "Cinsiyet": "Erkek", "Kalıp": "Regular"}
         },
         {
             "isim": "The North Face 1996 Retro Nuptse Ceket",
@@ -194,7 +221,8 @@ def seed():
             "fiyat": 8999.99,
             "stok": 25,
             "kategori": "Giyim & Moda",
-            "resim_url": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600",
+            "ozellikler": {"Marka": "The North Face", "Renk": "Siyah", "Beden": "L", "Cinsiyet": "Erkek"}
         },
         {
             "isim": "Ray-Ban Wayfarer Classic Güneş Gözlüğü",
@@ -202,7 +230,8 @@ def seed():
             "fiyat": 3299.99,
             "stok": 40,
             "kategori": "Giyim & Moda",
-            "resim_url": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600",
+            "ozellikler": {"Marka": "Ray-Ban", "Renk": "Siyah", "Cinsiyet": "Unisex"}
         },
 
         # Ev & Yaşam
@@ -212,7 +241,8 @@ def seed():
             "fiyat": 24999.99,
             "stok": 15,
             "kategori": "Ev & Yaşam",
-            "resim_url": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=600",
+            "ozellikler": {"Marka": "Dyson", "Kullanım Tipi": "Şarjlı", "Güç": "240 W"}
         },
         {
             "isim": "Nespresso Vertuo Next Kahve Makinesi",
@@ -220,7 +250,8 @@ def seed():
             "fiyat": 5499.99,
             "stok": 30,
             "kategori": "Ev & Yaşam",
-            "resim_url": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=600",
+            "ozellikler": {"Marka": "Nespresso", "Renk": "Siyah", "Türü": "Kapsüllü"}
         },
         {
             "isim": "iRobot Roomba j9+ Robot Süpürge",
@@ -228,7 +259,8 @@ def seed():
             "fiyat": 29999.99,
             "stok": 8,
             "kategori": "Ev & Yaşam",
-            "resim_url": "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600",
+            "ozellikler": {"Marka": "iRobot", "Haritalama": "Lazer (Lidar)", "Şarj Süresi": "3 Saat"}
         },
         {
             "isim": "Philips Airfryer XXL HD9285",
@@ -236,7 +268,8 @@ def seed():
             "fiyat": 6999.99,
             "stok": 22,
             "kategori": "Ev & Yaşam",
-            "resim_url": "https://images.unsplash.com/photo-1648398798875-a03ae2cff0d3?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1648398798875-a03ae2cff0d3?w=600",
+            "ozellikler": {"Marka": "Philips", "Kapasite": "7.3 L", "Renk": "Siyah"}
         },
 
         # Kişisel Bakım
@@ -246,7 +279,8 @@ def seed():
             "fiyat": 17999.99,
             "stok": 12,
             "kategori": "Kişisel Bakım",
-            "resim_url": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600",
+            "ozellikler": {"Marka": "Dyson", "Renk": "Nikel/Bakır", "Türü": "Saç Şekillendirici"}
         },
         {
             "isim": "Oral-B iO Series 9 Elektrikli Diş Fırçası",
@@ -254,7 +288,8 @@ def seed():
             "fiyat": 5499.99,
             "stok": 25,
             "kategori": "Kişisel Bakım",
-            "resim_url": "https://images.unsplash.com/photo-1559591937-abc1f8f90c9d?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1559591937-abc1f8f90c9d?w=600",
+            "ozellikler": {"Marka": "Oral-B", "Renk": "Siyah", "Türü": "Şarjlı Diş Fırçası"}
         },
         {
             "isim": "Philips OneBlade Pro QP6551",
@@ -262,7 +297,8 @@ def seed():
             "fiyat": 2299.99,
             "stok": 35,
             "kategori": "Kişisel Bakım",
-            "resim_url": "https://images.unsplash.com/photo-1621607505099-7125e08c1e96?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1621607505099-7125e08c1e96?w=600",
+            "ozellikler": {"Marka": "Philips", "Kullanım Bölgesi": "Yüz, Vücut", "Şarj Süresi": "1 Saat"}
         },
 
         # Spor & Outdoor
@@ -272,7 +308,8 @@ def seed():
             "fiyat": 29999.99,
             "stok": 20,
             "kategori": "Spor & Outdoor",
-            "resim_url": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=600",
+            "ozellikler": {"Marka": "Apple", "Kasa Çapı": "49 mm", "Kasa Materyali": "Titanyum", "Renk": "Natürel"}
         },
         {
             "isim": "Garmin Fenix 8 AMOLED",
@@ -280,7 +317,8 @@ def seed():
             "fiyat": 24999.99,
             "stok": 10,
             "kategori": "Spor & Outdoor",
-            "resim_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+            "ozellikler": {"Marka": "Garmin", "Ekran Tipi": "AMOLED", "GPS": "Var"}
         },
         {
             "isim": "Nike Dri-FIT ADV Running Tişört",
@@ -288,7 +326,8 @@ def seed():
             "fiyat": 1299.99,
             "stok": 100,
             "kategori": "Spor & Outdoor",
-            "resim_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600",
+            "ozellikler": {"Marka": "Nike", "Renk": "Siyah", "Beden": "M", "Cinsiyet": "Erkek"}
         },
         {
             "isim": "Under Armour HOVR Phantom 3",
@@ -296,7 +335,8 @@ def seed():
             "fiyat": 4799.99,
             "stok": 35,
             "kategori": "Spor & Outdoor",
-            "resim_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600"
+            "resim_url": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600",
+            "ozellikler": {"Marka": "Under Armour", "Renk": "Beyaz", "Beden": "43", "Cinsiyet": "Erkek"}
         },
     ]
 
@@ -310,6 +350,7 @@ def seed():
             "stok": p["stok"],
             "kategori_id": cat_map.get(p["kategori"]),
             "resim_url": p.get("resim_url"),
+            "ozellikler": p.get("ozellikler", {})
         }
         r = requests.post(f"{BASE}/urunler/", json=payload, headers=headers)
         if r.status_code in (200, 201):

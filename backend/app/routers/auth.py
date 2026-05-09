@@ -197,3 +197,48 @@ async def get_me(current_user: User = Depends(get_current_user)):
     Authorization header'da gecerli bir Bearer token gerektirir.
     """
     return current_user
+
+
+# ============================================================
+# PROFİL GÜNCELLEME
+# ============================================================
+from pydantic import BaseModel, Field
+from typing import Optional as Opt
+
+class ProfilGuncelle(BaseModel):
+    isim: Opt[str] = Field(None, min_length=2, max_length=100)
+    telefon: Opt[str] = Field(None, max_length=20)
+
+class SifreDegistir(BaseModel):
+    mevcut_sifre: str
+    yeni_sifre: str = Field(..., min_length=6)
+
+
+@router.patch("/profil", response_model=UserResponse, summary="Profil güncelle")
+def update_profile(
+    data: ProfilGuncelle,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Kullanıcı profil bilgilerini güncelle."""
+    if data.isim is not None:
+        current_user.isim = data.isim
+    if data.telefon is not None:
+        current_user.telefon = data.telefon
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post("/sifre-degistir", summary="Şifre değiştir")
+def change_password(
+    data: SifreDegistir,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Mevcut şifreyi doğrulayarak yeni şifre belirle."""
+    if not verify_password(data.mevcut_sifre, current_user.password_hash):
+        raise HTTPException(400, "Mevcut şifreniz hatalı.")
+    current_user.password_hash = hash_password(data.yeni_sifre)
+    db.commit()
+    return {"mesaj": "Şifreniz başarıyla değiştirildi."}

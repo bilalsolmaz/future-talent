@@ -1,11 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/shop/Home';
 import Products from './pages/shop/Products';
 import ProductDetail from './pages/shop/ProductDetail';
 import Cart from './pages/shop/Cart';
 import Profile from './pages/shop/Profile';
+import Favorites from './pages/shop/Favorites';
+import About from './pages/shop/About';
+import FAQ from './pages/shop/FAQ';
+import Contact from './pages/shop/Contact';
+import KVKK from './pages/shop/KVKK';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import { ProtectedRoute, AdminRoute } from './components/AuthRoutes';
@@ -15,6 +21,7 @@ import ProductsAdmin from './pages/admin/ProductsAdmin';
 import OrdersAdmin from './pages/admin/OrdersAdmin';
 import CategoriesAdmin from './pages/admin/CategoriesAdmin';
 import FinanceAdmin from './pages/admin/FinanceAdmin';
+import ReturnsAdmin from './pages/admin/ReturnsAdmin';
 
 function App() {
   return (
@@ -30,6 +37,7 @@ function App() {
             <Route path="kategoriler" element={<CategoriesAdmin />} />
             <Route path="siparisler" element={<OrdersAdmin />} />
             <Route path="finans" element={<FinanceAdmin />} />
+            <Route path="iadeler" element={<ReturnsAdmin />} />
           </Route>
         </Route>
 
@@ -45,22 +53,21 @@ function App() {
                 <Route path="/urunler" element={<Products />} />
                 <Route path="/urunler/:id" element={<ProductDetail />} />
                 <Route path="/sepet" element={<Cart />} />
+                <Route path="/hakkimizda" element={<About />} />
+                <Route path="/sss" element={<FAQ />} />
+                <Route path="/iletisim" element={<Contact />} />
+                <Route path="/kvkk" element={<KVKK />} />
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/register" element={<Register />} />
 
                 {/* Müşteri Korumalı Rotalar */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/profil" element={<Profile />} />
+                  <Route path="/favoriler" element={<Favorites />} />
                 </Route>
               </Routes>
             </main>
-            <footer className="bg-white border-t border-surface-200 mt-auto">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <p className="text-center text-surface-500 text-sm">
-                  &copy; {new Date().getFullYear()} LocalShop. Tüm hakları saklıdır.
-                </p>
-              </div>
-            </footer>
+            <Footer />
           </div>
         } />
       </Routes>

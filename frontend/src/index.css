@@ -87,3 +87,23 @@
     @apply w-full rounded-lg border border-surface-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:bg-surface-50 disabled:text-surface-500;
   }
 }
+
+/* Scrollbar gizleme (Kategori alt menüsü) */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Mobil menü slide-in animasyonu */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.25s ease-out;
+}

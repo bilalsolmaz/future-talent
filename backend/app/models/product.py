@@ -21,6 +21,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     func,
+    JSON
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -48,6 +49,7 @@ class Urun(Base):
         ForeignKey("kategoriler.id"), nullable=True
     )
     resim_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    ozellikler: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     aktif: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

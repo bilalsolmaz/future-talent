@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Tags, ShoppingCart, Store, LogOut, 
-  ChevronLeft, ChevronRight, Menu, X, DollarSign
+  ChevronLeft, ChevronRight, Menu, X, DollarSign, RotateCcw
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -16,6 +16,7 @@ const AdminLayout = () => {
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard, exact: true },
     { name: 'Siparişler', path: '/admin/siparisler', icon: ShoppingCart },
+    { name: 'İadeler', path: '/admin/iadeler', icon: RotateCcw },
     { name: 'Ürünler', path: '/admin/urunler', icon: Package },
     { name: 'Kategoriler', path: '/admin/kategoriler', icon: Tags },
     { name: 'Finans', path: '/admin/finans', icon: DollarSign },

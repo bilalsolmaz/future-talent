@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.routers import auth, categories, products, orders, ai
+from app.routers import auth, categories, products, orders, ai, returns, reviews, favorites, coupons
 
 settings = get_settings()
 
@@ -64,6 +64,10 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(orders.router)
 app.include_router(ai.router)
+app.include_router(returns.router)
+app.include_router(reviews.router)
+app.include_router(favorites.router)
+app.include_router(coupons.router)
 
 
 # ============================================================

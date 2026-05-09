@@ -2,15 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, Minus, Plus, ArrowLeft, Loader2, PackageOpen, 
-  Truck, ShieldCheck, RotateCcw, Star, ChevronRight, Check, AlertCircle
+  Truck, ShieldCheck, RotateCcw, Star, ChevronRight, Check, AlertCircle,
+  Heart, Send, Trash2, MessageSquare, User
 } from 'lucide-react';
 import api from '../../services/api';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+
+// Star component
+const StarRating = ({ rating, size = 16, interactive = false, onRate }) => (
+  <div className="flex items-center gap-0.5">
+    {[1, 2, 3, 4, 5].map(i => (
+      <Star
+        key={i}
+        size={size}
+        className={`${
+          i <= rating ? 'text-amber-400 fill-amber-400' : 'text-surface-200'
+        } ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+        onClick={() => interactive && onRate?.(i)}
+      />
+    ))}
+  </div>
+);
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, cart } = useCart();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -19,12 +38,26 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 
+  // Yorumlar
+  const [reviews, setReviews] = useState([]);
+  const [reviewSummary, setReviewSummary] = useState({ toplam: 0, ortalama: 0, dagilim: {} });
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState('');
+
+  // Favori
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
   // Sepetteki mevcut adet
   const cartItem = cart.find(item => item.id === parseInt(id));
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   useEffect(() => {
     fetchProduct();
+    fetchReviews();
+    checkFavorite();
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -37,7 +70,6 @@ const ProductDetail = () => {
       const response = await api.get(`/urunler/${id}`);
       setProduct(response.data);
 
-      // Aynı kategorideki diğer ürünleri getir
       if (response.data.kategori_id) {
         try {
           const relRes = await api.get(`/urunler/?kategori_id=${response.data.kategori_id}&limit=4`);
@@ -49,6 +81,62 @@ const ProductDetail = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const [reviewsRes, summaryRes] = await Promise.all([
+        api.get(`/yorumlar/urun/${id}`),
+        api.get(`/yorumlar/urun/${id}/ozet`),
+      ]);
+      setReviews(reviewsRes.data);
+      setReviewSummary(summaryRes.data);
+    } catch { /* silent */ }
+  };
+
+  const checkFavorite = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get(`/favoriler/kontrol/${id}`);
+      setIsFavorite(res.data.favoride);
+    } catch { /* silent */ }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user) { navigate('/auth/login'); return; }
+    setFavLoading(true);
+    try {
+      const res = await api.post('/favoriler/toggle', { urun_id: parseInt(id) });
+      setIsFavorite(res.data.status === 'added');
+    } catch { /* silent */ }
+    setFavLoading(false);
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (newRating === 0 || newComment.length < 5) {
+      setReviewMsg('Lütfen puan seçin ve en az 5 karakter yorum yazın.');
+      return;
+    }
+    setReviewSubmitting(true);
+    setReviewMsg('');
+    try {
+      await api.post('/yorumlar/', { urun_id: parseInt(id), puan: newRating, yorum: newComment });
+      setNewRating(0);
+      setNewComment('');
+      setReviewMsg('Yorumunuz başarıyla eklendi!');
+      fetchReviews();
+    } catch (err) {
+      setReviewMsg(err.response?.data?.detail || 'Yorum eklenirken bir hata oluştu.');
+    }
+    setReviewSubmitting(false);
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await api.delete(`/yorumlar/${reviewId}`);
+      fetchReviews();
+    } catch { /* silent */ }
   };
 
   const handleAddToCart = () => {
@@ -146,18 +234,40 @@ const ProductDetail = () => {
             <h1 className="text-3xl sm:text-4xl font-bold text-surface-900 leading-tight">
               {product.isim}
             </h1>
+            {/* Yıldız Özeti */}
+            {reviewSummary.toplam > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <StarRating rating={Math.round(reviewSummary.ortalama)} size={18} />
+                <span className="text-sm font-semibold text-surface-700">{reviewSummary.ortalama}</span>
+                <span className="text-sm text-surface-400">({reviewSummary.toplam} değerlendirme)</span>
+              </div>
+            )}
           </div>
 
-          {/* Fiyat */}
-          <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-extrabold text-surface-900">
-              ₺{product.fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-            </span>
-            {product.fiyat >= 500 && (
-              <span className="text-sm font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
-                Ücretsiz Kargo
+          {/* Fiyat + Favori */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-extrabold text-surface-900">
+                ₺{product.fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
               </span>
-            )}
+              {product.fiyat >= 500 && (
+                <span className="text-sm font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+                  Ücretsiz Kargo
+                </span>
+              )}
+            </div>
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favLoading}
+              className={`p-3 rounded-xl border-2 transition-all ${
+                isFavorite
+                  ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
+                  : 'bg-surface-50 border-surface-200 text-surface-400 hover:text-red-500 hover:border-red-200'
+              }`}
+              title={isFavorite ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+            >
+              <Heart size={22} className={isFavorite ? 'fill-red-500' : ''} />
+            </button>
           </div>
 
           {/* Stok Durumu */}
@@ -320,6 +430,120 @@ const ProductDetail = () => {
           </div>
         </section>
       )}
+
+      {/* ═══════ YORUM & DEĞERLENDİRME BÖLÜMÜ ═══════ */}
+      <section className="mt-16 border-t border-surface-100 pt-12">
+        <h2 className="text-2xl font-bold text-surface-900 mb-8 flex items-center gap-2">
+          <MessageSquare size={24} className="text-primary-600" />
+          Değerlendirmeler
+          {reviewSummary.toplam > 0 && (
+            <span className="text-base font-normal text-surface-400">({reviewSummary.toplam})</span>
+          )}
+        </h2>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Sol: Puan Özeti */}
+          <div className="lg:col-span-1">
+            <div className="card p-6 text-center">
+              <div className="text-5xl font-extrabold text-surface-900 mb-1">
+                {reviewSummary.ortalama || '—'}
+              </div>
+              <StarRating rating={Math.round(reviewSummary.ortalama)} size={22} />
+              <p className="text-sm text-surface-500 mt-2">{reviewSummary.toplam} değerlendirme</p>
+
+              {/* Dağılım barları */}
+              <div className="mt-6 space-y-2">
+                {[5, 4, 3, 2, 1].map(p => {
+                  const count = reviewSummary.dagilim?.[String(p)] || 0;
+                  const pct = reviewSummary.toplam ? (count / reviewSummary.toplam) * 100 : 0;
+                  return (
+                    <div key={p} className="flex items-center gap-2 text-xs">
+                      <span className="w-3 font-semibold text-surface-600">{p}</span>
+                      <Star size={12} className="text-amber-400 fill-amber-400" />
+                      <div className="flex-1 h-2 bg-surface-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="w-6 text-right text-surface-400">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Yorum Yaz Formu */}
+            {user && (
+              <form onSubmit={handleReviewSubmit} className="card p-6 mt-4">
+                <h4 className="font-semibold text-surface-900 mb-3">Yorum Yaz</h4>
+                <div className="mb-3">
+                  <label className="text-xs text-surface-500 mb-1 block">Puanınız</label>
+                  <StarRating rating={newRating} size={28} interactive onRate={setNewRating} />
+                </div>
+                <textarea
+                  className="w-full border border-surface-200 rounded-lg px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                  rows={3}
+                  placeholder="Ürün hakkındaki düşünceleriniz..."
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                />
+                {reviewMsg && (
+                  <p className={`text-xs mt-2 ${reviewMsg.includes('başarı') ? 'text-green-600' : 'text-red-600'}`}>{reviewMsg}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className="mt-3 w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50 text-sm"
+                >
+                  <Send size={14} /> {reviewSubmitting ? 'Gönderiliyor...' : 'Yorumu Gönder'}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* Sağ: Yorum Listesi */}
+          <div className="lg:col-span-2">
+            {reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map(r => (
+                  <div key={r.id} className="card p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold text-sm">
+                          {r.kullanici_adi?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-surface-900 text-sm">{r.kullanici_adi}</p>
+                          <div className="flex items-center gap-2">
+                            <StarRating rating={r.puan} size={14} />
+                            <span className="text-xs text-surface-400">
+                              {new Date(r.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {user && (user.id === r.user_id || user.rol === 'admin') && (
+                        <button
+                          onClick={() => handleDeleteReview(r.id)}
+                          className="p-1.5 text-surface-300 hover:text-red-500 transition-colors"
+                          title="Yorumu sil"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-sm text-surface-700 mt-3 leading-relaxed">{r.yorum}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card p-12 text-center border-dashed border-2">
+                <MessageSquare size={48} className="mx-auto text-surface-200 mb-4" />
+                <h3 className="text-lg font-bold text-surface-900 mb-1">Henüz Değerlendirme Yok</h3>
+                <p className="text-surface-500 text-sm">Bu ürünü satın aldıysanız ilk yorumu siz yapın!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

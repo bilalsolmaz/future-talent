@@ -14,6 +14,7 @@ class UrunBase(BaseModel):
     stok: int = Field(default=0, ge=0)
     kategori_id: int | None = None
     resim_url: str | None = None
+    ozellikler: dict | None = None
 
 class UrunCreate(UrunBase):
     """Ürün oluşturma isteği."""
@@ -27,6 +28,7 @@ class UrunUpdate(BaseModel):
     stok: int | None = Field(None, ge=0)
     kategori_id: int | None = None
     resim_url: str | None = None
+    ozellikler: dict | None = None
     aktif: bool | None = None
 
 class UrunResponse(UrunBase):

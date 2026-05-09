@@ -11,6 +11,7 @@ from app.core.security import get_current_user, require_admin
 from app.models.user import User
 from app.models.product import Urun
 from app.models.order import Siparis, SiparisKalemi
+from app.models.coupon import Kupon
 from app.schemas.order import SiparisCreate, SiparisResponse, SiparisDurumUpdate
 
 router = APIRouter(prefix="/api/siparisler", tags=["Siparişler"])
@@ -62,12 +63,21 @@ def create_siparis(
             birim_fiyat=urun.fiyat  # O anki fiyat dondurulur (Snapshot)
         ))
         
+    # Kupon kontrolü
+    if siparis_in.kupon_kodu:
+        kupon = db.query(Kupon).filter(Kupon.kod == siparis_in.kupon_kodu.upper(), Kupon.aktif == True).first()
+        if kupon and kupon.gecerli_mi():
+            indirim = kupon.indirim_hesapla(toplam_tutar)
+            toplam_tutar = max(Decimal('0'), toplam_tutar - indirim)
+            kupon.kullanim_sayisi += 1
+        
     # Siparişi oluştur
     yeni_siparis = Siparis(
         user_id=current_user.id,
         toplam_tutar=toplam_tutar,
         adres=siparis_in.adres,
         notlar=siparis_in.notlar,
+        kupon_kodu=siparis_in.kupon_kodu,
         kalemler=kalemler
     )
     

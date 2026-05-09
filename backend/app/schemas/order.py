@@ -43,6 +43,7 @@ class SiparisCreate(BaseModel):
     """Yeni sipariş oluşturma isteği."""
     adres: str = Field(..., min_length=10)
     notlar: str | None = None
+    kupon_kodu: str | None = None
     kalemler: list[SiparisKalemiCreate] = Field(..., min_length=1)
 
 class SiparisDurumUpdate(BaseModel):
@@ -59,6 +60,7 @@ class SiparisResponse(BaseModel):
     durum: str
     adres: str
     notlar: str | None
+    kupon_kodu: str | None
     created_at: datetime
     updated_at: datetime
     kalemler: list[SiparisKalemiResponse]
