@@ -1,150 +1,165 @@
 # 🛍️ LocalShop — MVP (Minimum Viable Product)
 
-> Küçük ve yerel işletmeler için komisyonsuz dijital vitrin & sipariş sistemi.
+> Küçük ve yerel işletmeler için AI-agent destekli dijital vitrin, sipariş ve operasyon otomasyon platformu.
 
 ---
 
 ## 🎯 MVP Hedefi
 
-LocalShop'un ilk çalışan sürümü; bir işletme sahibinin ürünlerini yönetebileceği, müşterilerin ürünleri inceleyip sipariş verebileceği ve yapay zekâ destekli içerik üretiminin kullanılabildiği **tam işlevsel bir web uygulamasıdır.**
+LocalShop MVP'si iki katmanlıdır:
 
-MVP kapsamı bilinçli olarak sınırlı tutulmuştur: karmaşıklık yerine çalışan, test edilebilir ve deploy edilebilir bir ürün önceliklidir.
+**Katman 1 — Temel E-ticaret**
+Ürün vitrini, sepet & sipariş, kullanıcı yönetimi.
+
+**Katman 2 — AI Otomasyon**
+Müşteri iletişim ajanı, kargo takibi, stok uyarıları, iş akışı otomasyonu.
+
+MVP, bu iki katmanın birlikte çalışan, test edilebilir ve deploy edilebilir halini kapsar.
 
 ---
 
-## ✅ MVP Kapsamındaki Özellikler
+## ✅ Katman 1 — Temel E-ticaret Özellikleri
 
 ### 1. Kullanıcı Girişi & Rol Yönetimi
-- [ ] Kullanıcı kayıt ol (ad, e-posta, şifre)
-- [ ] Kullanıcı giriş yap (JWT access token)
-- [ ] İki rol: `admin` (işletme sahibi) ve `musteri`
-- [ ] Korumalı rotalar — yetkisiz erişimde yönlendirme
-- [ ] Token yenileme (refresh token)
-- [ ] Şifre bcrypt ile hash'lenir, plaintext hiçbir yerde tutulmaz
+- [ ] Kullanıcı kayıt / giriş (JWT access + refresh token)
+- [ ] İki rol: `admin` ve `musteri`
+- [ ] Korumalı rotalar, bcrypt şifre hash
 
 ### 2. Ürün Vitrini & Yönetimi
-- [ ] Admin: ürün ekle (ad, açıklama, fiyat, stok, kategori, görsel URL)
-- [ ] Admin: ürün düzenle
-- [ ] Admin: ürün sil (soft delete — `aktif = false`)
-- [ ] Admin: stok güncelle
-- [ ] Müşteri: tüm aktif ürünleri listele
-- [ ] Müşteri: kategoriye göre filtrele
-- [ ] Müşteri: ada göre arama
-- [ ] Müşteri: ürün detay sayfası
+- [ ] Admin: ürün ekle / düzenle / sil (soft delete) / stok güncelle
+- [ ] Müşteri: listeleme, kategori filtresi, arama, detay sayfası
+- [ ] **Gemini AI — Ürün Açıklama Üreteci** (özgün özellik)
 
 ### 3. Sepet & Sipariş Akışı
-- [ ] Müşteri: sepete ürün ekle / çıkar / miktar güncelle
-- [ ] Müşteri: teslimat adresi ve not girerek sipariş oluştur
-- [ ] Admin: tüm siparişleri listele
-- [ ] Admin: sipariş detayını görüntüle
-- [ ] Admin: sipariş durumunu güncelle (`bekliyor` → `hazırlanıyor` → `teslim_edildi` → `iptal`)
-- [ ] Müşteri: kendi sipariş geçmişini görüntüle
+- [ ] Sepete ekle / çıkar / miktar güncelle
+- [ ] Sipariş oluşturma (stok kontrolü + otomatik düşüm)
+- [ ] Sipariş durum akışı: `bekliyor → hazirlaniyor → teslim_edildi / iptal`
+- [ ] Admin: sipariş listesi + durum güncelleme
 
-### 4. 🌟 Gemini AI — Ürün Açıklama Üreteci *(Özgün Özellik)*
-- [ ] Admin ürün ekleme formunda "AI ile Açıklama Oluştur" butonu
-- [ ] Ürün adı + fiyat → Gemini API → Türkçe profesyonel açıklama önerisi
-- [ ] Öneri düzenlenebilir metin alanına aktarılır
-- [ ] Admin isterse düzenler, isterse doğrudan kaydeder
-- [ ] API anahtarı yalnızca backend `.env` dosyasında tutulur
+---
+
+## ✅ Katman 2 — AI Otomasyon Özellikleri (Hackathon)
+
+### 4. Müşteri İletişim Ajanı — CustomerAgent
+- [ ] `/api/agent/chat` endpoint — doğal dil sorgu arayüzü
+- [ ] "Siparişim nerede?" → Otomatik sipariş sorgusu + kargo durumu yanıtı
+- [ ] "X ürün stokta var mı?" → Anlık stok kontrolü yanıtı
+- [ ] Konuşma geçmişi bağlam hafızası (son 10 mesaj)
+- [ ] WhatsApp Business API webhook entegrasyonu *(v1.1)*
+
+### 5. Kargo Takip Ajanı — CargoAgent
+- [ ] Kargo API entegrasyonu (Yurtiçi Kargo öncelikli, PTT/Aras eklenti)
+- [ ] Sipariş oluşturulunca kargo takip numarası kaydı
+- [ ] Gecikme tespiti: kargo durumu "gecikme" işaretlenince otomatik tespit
+- [ ] Gecikme → müşteriye otomatik bildirim (e-posta)
+- [ ] Gecikme → admin'e özet rapor
+
+### 6. Stok & Envanter Ajanı — StockAgent
+- [ ] Stok eşik sistemi: her ürün için `stok_esigi` alanı
+- [ ] Stok eşiğin altına düşünce admin'e otomatik uyarı (e-posta + dashboard)
+- [ ] Geçmiş satış verisine dayalı yenileme miktarı önerisi (Gemini)
+- [ ] Kritik stok dashboard widget'ı
+
+### 7. İş Akışı Ajanı — WorkflowAgent
+- [ ] Sabah 08:00 otomatik briefing (APScheduler cron)
+  - O güne ait siparişler
+  - Hazırlanması gereken paketler
+  - Kritik stok uyarıları
+  - Bugün teslim edilmesi gerekenler
+- [ ] Briefing e-posta ile admin'e gönderilir
+- [ ] Dashboard'da "Bugünün Özeti" widget'ı
+
+### 8. Analitik & İçgörü Ajanı — AnalyticsAgent *(Opsiyonel)*
+- [ ] Son 30 günlük satış trend analizi
+- [ ] En çok satan 5 ürün tahmini (Gemini + geçmiş veri)
+- [ ] Admin dashboard analitik sekmesi
+- [ ] Haftalık özet rapor (e-posta)
 
 ---
 
 ## 🚫 MVP Dışında Kalan Özellikler
 
-Bunlar v2 / sonraki sürümler için planlanmıştır:
-
-| Özellik | Gerekçe |
+| Özellik | Versiyon |
 |---|---|
-| Ödeme sistemi (iyzico, Stripe) | Entegrasyon karmaşıklığı |
-| SMS / e-posta bildirimi | Üçüncü taraf servis bağımlılığı |
-| Çok-tenant (birden fazla işletme) | Mimari genişletme gerektirir |
-| Ürün yorumları & puanlama | Ek moderasyon ihtiyacı |
-| Kargo takip entegrasyonu | Sağlayıcı API bağımlılığı |
-| Gelişmiş dashboard (grafik, analitik) | MVP sonrası nice-to-have |
-| Mobil uygulama (React Native) | Ayrı proje kapsamı |
+| WhatsApp Business API tam entegrasyon | v1.1 |
+| Ödeme sistemi (iyzico/Stripe) | v2 |
+| SMS bildirim (Twilio) | v2 |
+| Çok-tenant mimari | v2 |
+| Mobil uygulama | v3 |
+| Canlı sohbet (WebSocket) | v2 |
+| Gelişmiş ML tahmin modeli | v2 |
 
 ---
 
-## 🗂️ MVP Veri Modeli
+## 🗂️ Genişletilmiş Veri Modeli
 
 ```
+-- Mevcut tablolar
 users               → id, email, password_hash, rol, isim, telefon, created_at
 kategoriler         → id, isim, slug, created_at
-urunler             → id, isim, aciklama, fiyat, stok, kategori_id, resim_url, aktif, created_at
-siparisler          → id, user_id, toplam_tutar, durum, adres, not, created_at, updated_at
+urunler             → id, isim, aciklama, fiyat, stok, stok_esigi*, kategori_id, resim_url, aktif, created_at
+siparisler          → id, user_id, toplam_tutar, durum, adres, not, kargo_no*, created_at, updated_at
 siparis_kalemleri   → id, siparis_id, urun_id, adet, birim_fiyat
+
+-- Yeni tablolar (hackathon)
+kargo_takip         → id, siparis_id, firma, takip_no, durum, son_konum, guncelleme, gecikme_var
+agent_konusmalar    → id, user_id, mesajlar (JSONB), olusturulma, son_aktif
+stok_uyarilari      → id, urun_id, esik, mevcut_stok, durum, tetiklenme, kapatilma
+briefing_gecmisi    → id, tarih, icerik (JSONB), gonderildi
+analitik_ozet       → id, tarih, veriler (JSONB), tip (gunluk/haftalik/aylik)
+
+* yeni alanlar mevcut tablolara eklenir
 ```
 
 ---
 
-## 📐 MVP Sayfa Yapısı
+## 🏗️ Teknik Stack (Güncellenmiş)
 
-### Public (Müşteri)
-```
-/                   → Vitrin — öne çıkan ürünler
-/urunler            → Tüm ürünler (filtre + arama)
-/urun/:id           → Ürün detay
-/sepet              → Sepet
-/siparis            → Sipariş oluştur
-/giris              → Giriş
-/kayit              → Kayıt
-/profilim           → Sipariş geçmişi
-```
-
-### Admin (Korumalı — sadece admin rolü)
-```
-/admin              → Dashboard
-/admin/urunler      → Ürün listesi
-/admin/urun/ekle    → Yeni ürün ekle (AI destekli)
-/admin/urun/:id     → Ürün düzenle / sil
-/admin/siparisler   → Sipariş listesi
-/admin/siparis/:id  → Sipariş detayı & durum güncelle
-/admin/kategoriler  → Kategori yönetimi
-```
+| Katman | Teknoloji | Amaç |
+|---|---|---|
+| Frontend | React 18 + TailwindCSS | UI |
+| Backend | Python 3.11 + FastAPI | API + Agent orchestration |
+| Veritabanı | PostgreSQL 15 | Ana veri |
+| Önbellek/Kuyruk | Redis | Agent mesaj kuyruğu, session cache |
+| ORM | SQLAlchemy 2.x + Alembic | Veri erişimi |
+| Auth | JWT + bcrypt | Kimlik doğrulama |
+| AI Orchestrator | Google Gemini API | Tüm agent'ların beyni |
+| Zamanlayıcı | APScheduler | Cron görevleri (briefing, kargo kontrol) |
+| Kargo | Yurtiçi API + PTT API | Kargo takibi |
+| Bildirim | SendGrid (e-posta) | Otomatik bildirimler |
+| WhatsApp | Meta Business API | Müşteri iletişim kanalı |
+| Sunucu | Nginx + Uvicorn + Systemd | Deploy |
+| SSL | Let's Encrypt | HTTPS |
 
 ---
 
-## 🏗️ Teknik Stack
+## 🤖 Agent Mimarisi
 
-| Katman | Teknoloji |
-|---|---|
-| Frontend | React 18 + TailwindCSS |
-| Backend | Python 3.11 + FastAPI |
-| Veritabanı | PostgreSQL 15 |
-| ORM | SQLAlchemy 2.x |
-| Migration | Alembic |
-| Auth | JWT (python-jose) + bcrypt |
-| AI | Google Gemini API (`gemini-2.0-flash`) |
-| Web Sunucusu | Nginx |
-| Süreç Yönetimi | Uvicorn + Systemd |
-| SSL | Let's Encrypt (Certbot) |
-| Versiyon Kontrolü | Git + GitHub |
+```
+Gemini Agent Core (Orchestrator)
+├── CustomerAgent     → Doğal dil sorgu · sipariş/stok yanıtlama
+├── CargoAgent        → Kargo takip · gecikme tespiti · bildirim
+├── StockAgent        → Stok izleme · eşik uyarısı · yenileme önerisi
+├── WorkflowAgent     → Sabah briefing · görev dağılımı
+└── AnalyticsAgent    → Satış trendi · tahmin · özet rapor
+```
+
+Her agent: Gemini API + ilgili veritabanı + harici API erişimine sahip.
+Orchestrator: hangi agent'ın devreye gireceğini kullanıcı niyetine göre belirler.
 
 ---
 
 ## 🚀 MVP Başarı Kriterleri
 
-MVP tamamlanmış sayılır, aşağıdaki senaryolar uçtan uca çalıştığında:
-
-1. **Admin** sisteme giriş yapabilir
-2. **Admin** yeni ürün ekleyebilir; AI butonu çalışan bir açıklama üretebilir
-3. **Müşteri** kayıt olabilir ve giriş yapabilir
-4. **Müşteri** ürünleri listeleyebilir, filtreleyebilir, arama yapabilir
-5. **Müşteri** sepete ürün ekleyip sipariş oluşturabilir
-6. **Admin** siparişi görebilir ve durumunu güncelleyebilir
-7. **Müşteri** sipariş geçmişini görebilir
-8. Uygulama VPS üzerinde HTTPS ile erişilebilir durumdadır
+1. Admin ürün ekleyebilir, AI açıklama üreteci çalışır
+2. Müşteri sipariş verebilir, sepet akışı uçtan uca çalışır
+3. Müşteri chat'te "siparişim nerede?" yazınca otomatik yanıt alır
+4. Sipariş kargo gecikmesinde hem müşteri hem admin bildirim alır
+5. Stok eşiği aşılınca admin uyarı alır + yenileme önerisi gelir
+6. Her sabah 08:00'de admin günlük briefing e-postası alır
+7. Admin dashboard'da analitik özet görünür
+8. Tüm akış VPS üzerinde HTTPS ile erişilebilir
 
 ---
 
-## 📦 Teslim Edilecekler
-
-- [ ] GitHub reposu (kaynak kod)
-- [ ] `.zip` dosyası (Classroom'a yükleme)
-- [ ] `README.md` (kurulum + çalıştırma talimatları)
-- [ ] YouTube video demo (8–10 dakika)
-- [ ] Yansıtma raporu
-
----
-
-*LocalShop MVP — 2026*
+*LocalShop MVP — 2025–2026*

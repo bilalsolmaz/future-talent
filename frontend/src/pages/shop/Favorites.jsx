@@ -12,11 +12,6 @@ const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) { navigate('/auth/login'); return; }
-    fetchFavorites();
-  }, [user]);
-
   const fetchFavorites = async () => {
     setIsLoading(true);
     try {
@@ -25,6 +20,11 @@ const Favorites = () => {
     } catch (err) { console.error(err); }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (!user) { navigate('/auth/login'); return; }
+    fetchFavorites();
+  }, [user]);
 
   const handleRemove = async (urunId) => {
     try {

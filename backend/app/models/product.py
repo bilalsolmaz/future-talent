@@ -56,8 +56,8 @@ class Urun(Base):
     )
 
     # İlişkiler
-    kategori = relationship("Kategori", back_populates="urunler")
-    siparis_kalemleri = relationship("SiparisKalemi", back_populates="urun")
+    kategori: Mapped["Kategori"] = relationship("Kategori", back_populates="urunler")
+    siparis_kalemleri: Mapped[list["SiparisKalemi"]] = relationship("SiparisKalemi", back_populates="urun")
 
     def __repr__(self) -> str:
         return f"<Urun(id={self.id}, isim={self.isim}, fiyat={self.fiyat})>"

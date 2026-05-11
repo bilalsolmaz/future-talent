@@ -1,381 +1,475 @@
 # 📋 LocalShop — PRD (Product Requirements Document)
 
-> **Sürüm:** 1.0  
-> **Proje:**  LocalShop
-> **Yıl:** 2026  
+> **Sürüm:** 2.0 — Plan Genişletmesi  
+> **Proje:** KOBİ Otomasyon  
+> **Yıl:** 2025–2026
 
 ---
 
 ## 1. Ürün Özeti
 
-**LocalShop**, Türkiye'deki küçük ve yerel işletmelerin (kafe, butik, market, pastane vb.) komisyon ödemeden kendi dijital vitrinlerini kurmalarını ve sipariş almalarını sağlayan bir web uygulamasıdır.
+**LocalShop**, Türkiye'deki küçük ve yerel işletmelerin komisyon ödemeden kendi dijital vitrinlerini kurabilecekleri, siparişlerini yönetebilecekleri ve **AI destekli otomasyon** ile operasyonel yüklerini azaltabilecekleri bir web platformudur.
 
-### Problem
+### Problem (Genişletilmiş)
 
-Küçük esnaf dijital satış kanalı kuramıyor. Sipariş WhatsApp'tan alınıyor, stok telefonda soruluyor. Büyük e-ticaret platformları yüksek komisyon alıyor ve küçük işletmeler için gereksiz yere karmaşık.
+Küçük işletmeler iki katmanlı bir sorunla karşı karşıyadır:
+
+**Dijital Kanal Sorunu:** WhatsApp/telefon sipariş kaosundan kurtulup dijital satış kanalı kuramamak.
+
+**Operasyonel Yük Sorunu:** Sipariş durumu sorularını yanıtlamak (günde 2–3 saat), stok tükenmesini geç fark etmek, kargo gecikmelerinden müşteriden önce haberdar olamamak.
 
 ### Çözüm
 
-Her işletme için kurulum gerektirmeyen, komisyonsuz, sade bir mini e-ticaret mağazası. Gemini AI desteğiyle işletme sahibi teknik bilgiye ihtiyaç duymadan profesyonel içerik üretebilir.
+Hackathon kapsamında LocalShop şu dönüşümü gerçekleştirir:
 
-### Hedef Kullanıcılar
-
-| Kullanıcı | Açıklama |
-|---|---|
-| **Admin** | İşletme sahibi. Ürün ve sipariş yönetimi yapar. |
-| **Müşteri** | Son kullanıcı. Vitrine bakar, sipariş verir. |
+```
+Basit E-ticaret  →  AI-Agent Destekli Operasyon Platformu
+```
 
 ---
 
-## 2. Hedefler & Başarı Metrikleri
+## 2. Hedef Kitle
 
-| Hedef | Metrik |
+| Segment | Tanım |
 |---|---|
-| Temel özellikler çalışıyor olmalı | 3 temel özellik uçtan uca test edilebilir |
-| Özgün AI özelliği implement edilmeli | Gemini API entegrasyonu çalışıyor |
-| Production deploy tamamlanmalı | HTTPS ile erişilebilir VPS |
-| Kod kalitesi akademik & ticari standarda uygun | Modüler yapı, hata yönetimi, güvenlik |
-| Sunum savunulabilir olmalı | Her mimari karar açıklanabilir |
+| Küçük e-ticaret | 20–200 ürün, günde 10–100 sipariş |
+| Butik / bölgesel satıcı | Fiziksel + online karma yapı |
+| Üretici kooperatifleri | Tarım, gıda, el sanatları |
+| Tek mağaza işletmesi | Kafe, pastane, market |
 
 ---
 
-## 3. Kullanıcı Hikayeleri (User Stories)
+## 3. Kullanıcı Hikayeleri
 
-### Müşteri
-
-```
-US-01  Bir müşteri olarak, ürünleri kategorilere göre filtreleyebilmek istiyorum;
-       böylece aradığımı hızlıca bulabilirim.
-
-US-02  Bir müşteri olarak, ürün adına göre arama yapabilmek istiyorum.
-
-US-03  Bir müşteri olarak, ürün detay sayfasını görebilmek istiyorum;
-       böylece fiyat, stok ve açıklamayı öğrenebilirim.
-
-US-04  Bir müşteri olarak, sepetime ürün ekleyip miktarı güncelleyebilmek istiyorum.
-
-US-05  Bir müşteri olarak, teslimat adresimi ve notumu girerek sipariş verebilmek istiyorum.
-
-US-06  Bir müşteri olarak, geçmiş siparişlerimi ve durumlarını görebilmek istiyorum.
-
-US-07  Bir müşteri olarak, e-posta ve şifreyle kayıt olup giriş yapabilmek istiyorum.
-```
-
-### Admin (İşletme Sahibi)
+### Temel E-ticaret (Katman 1)
 
 ```
-US-08  Bir admin olarak, yeni ürün ekleyebilmek istiyorum;
-       ad, fiyat, stok, kategori ve görsel URL girebilmeliyim.
+US-01  Müşteri olarak ürünleri kategoriye göre filtreleyebilmek istiyorum.
+US-02  Müşteri olarak ürün adına göre arama yapabilmek istiyorum.
+US-03  Müşteri olarak sepete ürün ekleyip miktarı güncelleyebilmek istiyorum.
+US-04  Müşteri olarak adres girerek sipariş oluşturabilmek istiyorum.
+US-05  Müşteri olarak sipariş geçmişimi ve durumlarını görebilmek istiyorum.
+US-06  Admin olarak ürün ekleyebilmeli, AI ile açıklama üretebilmeliyim.
+US-07  Admin olarak siparişleri listeleyip durumlarını güncelleyebilmeliyim.
+```
 
-US-09  Bir admin olarak, ürün açıklamasını AI yardımıyla oluşturabilmek istiyorum;
-       böylece pazarlama metni yazmak için zaman harcamam.
+### AI Otomasyon (Katman 2)
 
-US-10  Bir admin olarak, mevcut ürünleri düzenleyip silebilmek istiyorum.
+```
+US-08  Müşteri olarak "siparişim nerede?" yazınca insan müdahalesi olmadan
+       anlık kargo bilgisi alabilmek istiyorum.
 
-US-11  Bir admin olarak, gelen siparişleri listeleyip detaylarını görebilmek istiyorum.
+US-09  Müşteri olarak "X ürün var mı?" yazınca anlık stok bilgisi
+       alabilmek istiyorum.
 
-US-12  Bir admin olarak, sipariş durumunu güncelleyebilmek istiyorum
-       (bekliyor → hazırlanıyor → teslim edildi / iptal).
+US-10  Admin olarak bir ürünün stoğu kritik eşiğin altına düşünce
+       otomatik uyarı ve yenileme önerisi almak istiyorum.
 
-US-13  Bir admin olarak, kategorileri yönetebilmek istiyorum (ekle / sil / düzenle).
+US-11  Admin olarak kargo gecikmesi olan siparişleri müşteri şikayet
+       etmeden önce tespit etmek istiyorum.
+
+US-12  Admin olarak her sabah günün sipariş özetini, hazırlanması
+       gereken paketleri ve kritik stokları otomatik e-posta ile
+       almak istiyorum.
+
+US-13  Admin olarak son 30 günlük satış trendini ve gelecek hafta
+       için stok tahminini dashboard'dan görebilmek istiyorum.
 ```
 
 ---
 
 ## 4. Fonksiyonel Gereksinimler
 
-### 4.1 Kimlik Doğrulama & Yetkilendirme
+### 4.1 Auth & Rol Yönetimi
 
 | ID | Gereksinim | Öncelik |
 |---|---|---|
-| F-01 | Kullanıcı e-posta + şifre ile kayıt olabilmeli | Zorunlu |
-| F-02 | Kullanıcı e-posta + şifre ile giriş yapabilmeli | Zorunlu |
-| F-03 | Giriş başarılı olduğunda JWT access token döndürülmeli | Zorunlu |
-| F-04 | Refresh token ile access token yenilenebilmeli | Zorunlu |
-| F-05 | Admin rotaları sadece `rol=admin` kullanıcıya açık olmalı | Zorunlu |
-| F-06 | Şifre bcrypt ile hash'lenerek saklanmalı | Zorunlu |
+| F-01 | Kayıt / giriş (e-posta + şifre) | Zorunlu |
+| F-02 | JWT access (30 dk) + refresh (7 gün) token | Zorunlu |
+| F-03 | Admin ve musteri rolleri, korumalı rotalar | Zorunlu |
+| F-04 | bcrypt şifre hash (rounds=12) | Zorunlu |
 
-### 4.2 Ürün Yönetimi
+### 4.2 Ürün & Kategori Yönetimi
 
 | ID | Gereksinim | Öncelik |
 |---|---|---|
-| F-07 | Admin ürün ekleyebilmeli (ad, açıklama, fiyat, stok, kategori_id, resim_url) | Zorunlu |
-| F-08 | Admin ürün güncelleyebilmeli | Zorunlu |
-| F-09 | Admin ürünü soft-delete yapabilmeli (`aktif=false`) | Zorunlu |
-| F-10 | Admin stok miktarını güncelleyebilmeli | Zorunlu |
-| F-11 | Müşteri sadece `aktif=true` ürünleri görebilmeli | Zorunlu |
-| F-12 | Ürünler kategori bazlı filtrelenebilmeli | Zorunlu |
-| F-13 | Ürünler ada göre aranabilmeli (ILIKE sorgusu) | Zorunlu |
+| F-05 | Ürün CRUD (soft delete) + stok güncelleme | Zorunlu |
+| F-06 | Kategori CRUD | Zorunlu |
+| F-07 | Listeleme: filtre (kategori) + arama (ILIKE) + sayfalama | Zorunlu |
+| F-08 | Her ürüne `stok_esigi` alanı | Zorunlu |
+| F-09 | Gemini AI ürün açıklama üreteci | Zorunlu |
 
 ### 4.3 Sipariş Akışı
 
 | ID | Gereksinim | Öncelik |
 |---|---|---|
-| F-14 | Müşteri oturum açmadan sepete ürün ekleyebilmeli (localStorage) | Orta |
-| F-15 | Sipariş oluşturmak için oturum açılmış olmalı | Zorunlu |
-| F-16 | Sipariş oluşturulurken stok kontrolü yapılmalı | Zorunlu |
-| F-17 | Sipariş oluşturulduğunda stok otomatik düşülmeli | Zorunlu |
-| F-18 | Sipariş durumu 4 adımda takip edilebilmeli | Zorunlu |
-| F-19 | Admin tüm siparişleri görebilmeli, müşteri sadece kendininkini | Zorunlu |
+| F-10 | Sipariş oluşturma (stok kontrolü + transaction) | Zorunlu |
+| F-11 | Kargo takip numarası alanı sipariş tablosunda | Zorunlu |
+| F-12 | Durum akışı: bekliyor → hazirlaniyor → teslim_edildi / iptal | Zorunlu |
+| F-13 | Admin: tüm siparişler; Müşteri: kendi siparişleri | Zorunlu |
 
-### 4.4 Gemini AI Entegrasyonu
+### 4.4 CustomerAgent — Müşteri İletişim Otomasyonu
 
 | ID | Gereksinim | Öncelik |
 |---|---|---|
-| F-20 | Admin ürün adı + fiyat girince AI açıklama önerisi alabilmeli | Zorunlu |
-| F-21 | AI isteği backend üzerinden yapılmalı (API key frontend'e çıkmaz) | Zorunlu |
-| F-22 | AI yanıtı düzenlenebilir textarea'ya aktarılmalı | Zorunlu |
-| F-23 | AI servisi başarısız olursa kullanıcıya anlamlı hata mesajı gösterilmeli | Zorunlu |
+| F-14 | `POST /api/agent/chat` — doğal dil mesaj kabul eder | Zorunlu |
+| F-15 | Niyet sınıflandırma: sipariş_sorgu / stok_sorgu / genel | Zorunlu |
+| F-16 | Sipariş sorgusu: sipariş_id veya e-posta ile anlık durum | Zorunlu |
+| F-17 | Stok sorgusu: ürün adı ile anlık stok kontrolü | Zorunlu |
+| F-18 | Konuşma geçmişi hafızası (son 10 mesaj bağlam) | Zorunlu |
+| F-19 | WhatsApp webhook endpoint (`POST /api/webhook/whatsapp`) | Yüksek |
+| F-20 | Agent yanıtı 3 saniye içinde dönmeli | Zorunlu |
+
+### 4.5 CargoAgent — Kargo Süreç Yönetimi
+
+| ID | Gereksinim | Öncelik |
+|---|---|---|
+| F-21 | Kargo takip API entegrasyonu (Yurtiçi öncelikli) | Zorunlu |
+| F-22 | `GET /api/cargo/track/{siparis_id}` — anlık kargo durumu | Zorunlu |
+| F-23 | Periyodik kargo durum kontrolü (APScheduler — her 2 saatte) | Zorunlu |
+| F-24 | Gecikme tespiti → müşteriye otomatik e-posta bildirimi | Zorunlu |
+| F-25 | Gecikme tespiti → admin'e özet rapor | Zorunlu |
+| F-26 | `kargo_takip` tablosunda durum geçmişi tutulması | Zorunlu |
+
+### 4.6 StockAgent — Stok & Envanter Yönetimi
+
+| ID | Gereksinim | Öncelik |
+|---|---|---|
+| F-27 | Sipariş oluşturulunca stok eşik kontrolü (synchronous) | Zorunlu |
+| F-28 | Stok < eşik → `stok_uyarilari` tablosuna kayıt | Zorunlu |
+| F-29 | Stok < eşik → admin'e e-posta + dashboard uyarısı | Zorunlu |
+| F-30 | Gemini: geçmiş satış verisine göre yenileme miktarı önerisi | Zorunlu |
+| F-31 | `GET /api/stock/alerts` — açık uyarılar listesi [admin] | Zorunlu |
+| F-32 | Uyarı kapatma / onaylama mekanizması | Yüksek |
+
+### 4.7 WorkflowAgent — Görev & İş Akışı Otomasyonu
+
+| ID | Gereksinim | Öncelik |
+|---|---|---|
+| F-33 | APScheduler cron: her sabah 08:00 briefing tetikleme | Zorunlu |
+| F-34 | Briefing içeriği: günlük siparişler, hazır paketler, kritik stoklar | Zorunlu |
+| F-35 | Briefing e-posta ile admin'e gönderilir (SendGrid) | Zorunlu |
+| F-36 | Dashboard "Bugünün Özeti" widget'ı anlık güncellenir | Zorunlu |
+| F-37 | `GET /api/workflow/briefing/today` — günlük özet endpoint'i | Zorunlu |
+| F-38 | Briefing içeriği `briefing_gecmisi` tablosuna kaydedilir | Yüksek |
+
+### 4.8 AnalyticsAgent — Analitik & İçgörü (Opsiyonel)
+
+| ID | Gereksinim | Öncelik |
+|---|---|---|
+| F-39 | Son 30 günlük satış trend analizi | Orta |
+| F-40 | En çok satan 5 ürün tahmini (Gemini + geçmiş veri) | Orta |
+| F-41 | `GET /api/analytics/insights` — haftalık özet | Orta |
+| F-42 | Admin dashboard analitik sekmesi | Orta |
 
 ---
 
 ## 5. Fonksiyonel Olmayan Gereksinimler
 
 ### 5.1 Güvenlik
-
-- Tüm şifreler bcrypt (`rounds=12`) ile hash'lenir
-- JWT token süresi: access = 30 dakika, refresh = 7 gün
-- SQL injection koruması: SQLAlchemy ORM (parameterized queries)
-- CORS: sadece tanımlı origin'lerden istek kabul edilir
-- PostgreSQL: dışarıya kapalı, sadece `localhost` erişimi
-- `.env` dosyası git'e eklenmez (`.gitignore`)
-- Gemini API anahtarı yalnızca `backend/.env` dosyasında
+- JWT token expiry zorunlu; refresh token rotation uygulanır
+- API key'ler yalnızca `.env` dosyasında; frontend'e çıkmaz
+- WhatsApp webhook `X-Hub-Signature-256` doğrulaması yapılır
+- Harici API çağrıları (kargo, e-posta) yalnızca backend üzerinden
+- PostgreSQL ve Redis dışarıya kapalı (sadece localhost)
+- Rate limiting: `/api/agent/chat` → max 20 istek/dakika/kullanıcı
 
 ### 5.2 Performans
+- Agent chat yanıt süresi: ≤ 3 saniye
+- Kargo durum kontrolü: her 2 saatte bir, asenkron
+- Sabah briefing oluşturma: ≤ 30 saniye
+- Ürün listeleme: sayfalama ile ≤ 500ms
 
-- Ürün listeleme endpoint'i sayfalama (pagination) destekler
-- Veritabanı sorgularında uygun index'ler tanımlı
+### 5.3 Güvenilirlik
+- Agent çağrısı başarısız olursa 3 kez retry, sonra fallback mesaj
+- Kargo API'si erişilemezse son bilinen durum döndürülür
+- E-posta gönderimi başarısız olursa sıraya alınır (Redis)
+- APScheduler görev başarısız olursa loglama ve admin bildirimi
 
-### 5.3 Erişilebilirlik & UX
-
-- Arayüz tüm modern tarayıcılarda çalışmalı
-- Mobil uyumlu (responsive) tasarım
-- Anlamlı hata mesajları (form doğrulama hataları kullanıcıya gösterilir)
-- Yükleme durumları (loading state) gösterilir
-
-### 5.4 Deploy
-
-- Uygulama VPS (Ubuntu 24.04) üzerinde çalışır
-- HTTPS zorunlu (Let's Encrypt SSL)
-- FastAPI: Uvicorn + Systemd (otomatik başlama)
-- React build dosyaları Nginx tarafından statik olarak serve edilir
+### 5.4 Gözlemlenebilirlik
+- Tüm agent çağrıları ve yanıtları loglanır (tarih, süre, hata)
+- Kargo durum geçmişi `kargo_takip` tablosunda tutulur
+- Briefing geçmişi `briefing_gecmisi` tablosunda tutulur
+- FastAPI `/api/healthcheck` endpoint'i tüm servisleri kontrol eder
 
 ---
 
 ## 6. Sistem Mimarisi
 
 ```
-Browser
-  │
-  ▼
-Nginx (port 80/443)
-  ├── /          →  React (static files — /var/www/localshop/frontend)
-  └── /api       →  FastAPI (localhost:8000)
-                        │
-                        ├── SQLAlchemy ORM
-                        │       └── PostgreSQL (localhost:5432)
-                        │
-                        └── Gemini API (external — HTTPS)
+Browser / WhatsApp
+      │
+      ▼
+   Nginx (80/443)
+      ├── /              → React SPA
+      └── /api           → FastAPI (localhost:8000)
+                               │
+              ┌────────────────┼─────────────────┐
+              │                │                 │
+         Agent Layer      PostgreSQL           Redis
+         (Gemini Core)    (localhost:5432)  (localhost:6379)
+              │
+    ┌─────────┼─────────┬──────────┐
+    │         │         │          │
+Customer  Cargo    Stock     Workflow
+ Agent    Agent    Agent     Agent
+    │         │         │          │
+    └────┬────┘    ┌────┘    ┌─────┘
+         │         │         │
+    Gemini API  Kargo API  APScheduler
+                          SendGrid
 ```
 
 ---
 
-## 7. API Endpoint Listesi
+## 7. Genişletilmiş API Endpoint Listesi
 
-### Auth
+### Mevcut (Katman 1)
 ```
-POST   /api/auth/register          Yeni kullanıcı kayıt
-POST   /api/auth/login             Giriş → access + refresh token
-POST   /api/auth/refresh           Token yenile
-POST   /api/auth/logout            Çıkış (refresh token geçersizleştir)
-```
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/refresh
 
-### Ürünler
-```
-GET    /api/urunler                Ürün listesi (filtre: kategori, arama, sayfa)
-GET    /api/urunler/:id            Ürün detay
-POST   /api/urunler                Ürün ekle          [admin]
-PUT    /api/urunler/:id            Ürün güncelle      [admin]
-DELETE /api/urunler/:id            Ürün sil           [admin]
-```
+GET    /api/urunler              ?kategori=&q=&sayfa=
+GET    /api/urunler/:id
+POST   /api/urunler              [admin]
+PUT    /api/urunler/:id          [admin]
+DELETE /api/urunler/:id          [admin]
 
-### Kategoriler
-```
-GET    /api/kategoriler            Tüm kategoriler
-POST   /api/kategoriler            Kategori ekle      [admin]
-PUT    /api/kategoriler/:id        Kategori güncelle  [admin]
-DELETE /api/kategoriler/:id        Kategori sil       [admin]
-```
+GET    /api/kategoriler
+POST   /api/kategoriler          [admin]
+PUT    /api/kategoriler/:id      [admin]
+DELETE /api/kategoriler/:id      [admin]
 
-### Siparişler
-```
-GET    /api/siparisler             Tüm siparişler     [admin]
-GET    /api/siparisler/benim       Kendi siparişlerim [musteri]
-GET    /api/siparisler/:id         Sipariş detay      [admin | sipariş sahibi]
-POST   /api/siparisler             Sipariş oluştur    [musteri]
-PATCH  /api/siparisler/:id/durum   Durum güncelle     [admin]
+GET    /api/siparisler           [admin]
+GET    /api/siparisler/benim     [musteri]
+POST   /api/siparisler           [musteri]
+PATCH  /api/siparisler/:id/durum [admin]
+
+POST   /api/ai/aciklama-olustur  [admin]
 ```
 
-### AI
+### Yeni (Katman 2)
 ```
-POST   /api/ai/aciklama-olustur    Ürün açıklaması üret (Gemini) [admin]
+# CustomerAgent
+POST   /api/agent/chat           { "mesaj": "...", "session_id": "..." }
+GET    /api/agent/konusmalar     [musteri] kendi geçmişi
+POST   /api/webhook/whatsapp     Meta webhook (imza doğrulamalı)
+
+# CargoAgent
+GET    /api/cargo/track/:siparis_id
+POST   /api/cargo/sync           [admin] manuel kargo güncelleme tetikle
+
+# StockAgent
+GET    /api/stock/alerts         [admin] açık uyarılar
+PATCH  /api/stock/alerts/:id     [admin] uyarı kapat
+
+# WorkflowAgent
+GET    /api/workflow/briefing/today   [admin]
+GET    /api/workflow/briefing/:tarih  [admin] geçmiş briefing
+
+# AnalyticsAgent
+GET    /api/analytics/insights   [admin] ?tip=haftalik|aylik
+GET    /api/analytics/tahmin     [admin] önümüzdeki hafta önerisi
 ```
 
 ---
 
-## 8. Veritabanı Şeması
+## 8. Genişletilmiş Veritabanı Şeması
 
 ```sql
--- Kullanıcılar
-CREATE TABLE users (
-    id            SERIAL PRIMARY KEY,
-    email         VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    rol           VARCHAR(10) NOT NULL DEFAULT 'musteri',  -- 'admin' | 'musteri'
-    isim          VARCHAR(100) NOT NULL,
-    telefon       VARCHAR(20),
-    created_at    TIMESTAMP DEFAULT NOW()
+-- Mevcut tablolara eklenen alanlar
+ALTER TABLE urunler    ADD COLUMN stok_esigi INTEGER DEFAULT 10;
+ALTER TABLE siparisler ADD COLUMN kargo_no VARCHAR(100);
+
+-- Yeni tablolar
+CREATE TABLE kargo_takip (
+  id SERIAL PRIMARY KEY,
+  siparis_id INTEGER NOT NULL REFERENCES siparisler(id),
+  firma VARCHAR(50),
+  takip_no VARCHAR(100),
+  durum VARCHAR(50),
+  son_konum TEXT,
+  gecikme_var BOOLEAN DEFAULT FALSE,
+  guncelleme TIMESTAMP DEFAULT NOW()
 );
 
--- Kategoriler
-CREATE TABLE kategoriler (
-    id         SERIAL PRIMARY KEY,
-    isim       VARCHAR(100) NOT NULL,
-    slug       VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+CREATE TABLE agent_konusmalar (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  session_id VARCHAR(100) UNIQUE,
+  mesajlar JSONB NOT NULL DEFAULT '[]',
+  kanal VARCHAR(20) DEFAULT 'web', -- 'web' | 'whatsapp'
+  olusturulma TIMESTAMP DEFAULT NOW(),
+  son_aktif TIMESTAMP DEFAULT NOW()
 );
 
--- Ürünler
-CREATE TABLE urunler (
-    id          SERIAL PRIMARY KEY,
-    isim        VARCHAR(255) NOT NULL,
-    aciklama    TEXT,
-    fiyat       NUMERIC(10, 2) NOT NULL,
-    stok        INTEGER NOT NULL DEFAULT 0,
-    kategori_id INTEGER REFERENCES kategoriler(id),
-    resim_url   VARCHAR(500),
-    aktif       BOOLEAN DEFAULT TRUE,
-    created_at  TIMESTAMP DEFAULT NOW()
+CREATE TABLE stok_uyarilari (
+  id SERIAL PRIMARY KEY,
+  urun_id INTEGER NOT NULL REFERENCES urunler(id),
+  esik INTEGER NOT NULL,
+  mevcut_stok INTEGER NOT NULL,
+  oneri TEXT,
+  durum VARCHAR(20) DEFAULT 'acik', -- 'acik' | 'kapatildi'
+  tetiklenme TIMESTAMP DEFAULT NOW(),
+  kapatilma TIMESTAMP
 );
 
--- Siparişler
-CREATE TABLE siparisler (
-    id            SERIAL PRIMARY KEY,
-    user_id       INTEGER NOT NULL REFERENCES users(id),
-    toplam_tutar  NUMERIC(10, 2) NOT NULL,
-    durum         VARCHAR(20) NOT NULL DEFAULT 'bekliyor',
-    adres         TEXT NOT NULL,
-    not           TEXT,
-    created_at    TIMESTAMP DEFAULT NOW(),
-    updated_at    TIMESTAMP DEFAULT NOW()
+CREATE TABLE briefing_gecmisi (
+  id SERIAL PRIMARY KEY,
+  tarih DATE UNIQUE NOT NULL,
+  icerik JSONB NOT NULL,
+  gonderildi BOOLEAN DEFAULT FALSE,
+  olusturulma TIMESTAMP DEFAULT NOW()
 );
 
--- Sipariş Kalemleri
-CREATE TABLE siparis_kalemleri (
-    id          SERIAL PRIMARY KEY,
-    siparis_id  INTEGER NOT NULL REFERENCES siparisler(id),
-    urun_id     INTEGER NOT NULL REFERENCES urunler(id),
-    adet        INTEGER NOT NULL,
-    birim_fiyat NUMERIC(10, 2) NOT NULL
+CREATE TABLE analitik_ozet (
+  id SERIAL PRIMARY KEY,
+  baslangic_tarihi DATE,
+  bitis_tarihi DATE,
+  tip VARCHAR(20), -- 'gunluk' | 'haftalik' | 'aylik'
+  veriler JSONB NOT NULL,
+  olusturulma TIMESTAMP DEFAULT NOW()
 );
 ```
 
 ---
 
-## 9. Klasör Yapısı
+## 9. Klasör Yapısı (Güncellenmiş)
 
 ```
 localshop/
 ├── frontend/
-│   ├── public/
 │   └── src/
-│       ├── components/          # Tekrar kullanılabilir bileşenler
-│       │   ├── ui/              # Button, Input, Card vb.
-│       │   ├── layout/          # Navbar, Footer, AdminLayout
-│       │   └── product/         # ProductCard, ProductList vb.
+│       ├── components/
+│       │   ├── ui/
+│       │   ├── layout/
+│       │   ├── product/
+│       │   └── agent/         # ChatWidget, BriefingCard, StockAlertBadge
 │       ├── pages/
-│       │   ├── public/          # Home, Products, ProductDetail, Cart, Order
-│       │   └── admin/           # Dashboard, Products, Orders, Categories
-│       ├── hooks/               # useCart, useAuth, useProducts
-│       ├── services/            # api.js, authService.js, productService.js
-│       ├── context/             # AuthContext, CartContext
-│       └── utils/               # formatPrice, validators vb.
+│       │   ├── public/
+│       │   └── admin/
+│       │       └── Analytics/ # Yeni analitik sayfası
+│       ├── hooks/
+│       ├── services/
+│       │   ├── agentService.js
+│       │   ├── cargoService.js
+│       │   └── analyticsService.js
+│       └── context/
 │
 ├── backend/
 │   ├── app/
-│   │   ├── models/              # user.py, product.py, order.py, category.py
-│   │   ├── schemas/             # Pydantic request & response şemaları
-│   │   ├── routers/             # auth.py, products.py, orders.py, ai.py
-│   │   ├── services/            # auth_service.py, ai_service.py
-│   │   ├── core/                # config.py, security.py, database.py
-│   │   └── main.py              # FastAPI app başlangıcı, CORS, router kayıtları
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── product.py
+│   │   │   ├── order.py
+│   │   │   ├── cargo.py         # Yeni
+│   │   │   ├── conversation.py  # Yeni
+│   │   │   ├── stock_alert.py   # Yeni
+│   │   │   └── briefing.py      # Yeni
+│   │   ├── schemas/
+│   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   ├── products.py
+│   │   │   ├── orders.py
+│   │   │   ├── categories.py
+│   │   │   ├── ai.py
+│   │   │   ├── agent.py         # Yeni — CustomerAgent
+│   │   │   ├── cargo.py         # Yeni — CargoAgent
+│   │   │   ├── stock.py         # Yeni — StockAgent
+│   │   │   ├── workflow.py      # Yeni — WorkflowAgent
+│   │   │   ├── analytics.py     # Yeni — AnalyticsAgent
+│   │   │   └── webhooks.py      # Yeni — WhatsApp webhook
+│   │   ├── agents/              # Yeni agent katmanı
+│   │   │   ├── core.py          # Gemini orchestrator
+│   │   │   ├── customer_agent.py
+│   │   │   ├── cargo_agent.py
+│   │   │   ├── stock_agent.py
+│   │   │   ├── workflow_agent.py
+│   │   │   └── analytics_agent.py
+│   │   ├── services/
+│   │   │   ├── auth_service.py
+│   │   │   ├── ai_service.py
+│   │   │   ├── cargo_service.py    # Yeni — kargo API wrapper
+│   │   │   ├── email_service.py    # Yeni — SendGrid wrapper
+│   │   │   └── notification_service.py  # Yeni
+│   │   ├── scheduler/              # Yeni
+│   │   │   ├── __init__.py
+│   │   │   ├── tasks.py            # APScheduler görev tanımları
+│   │   │   └── jobs/
+│   │   │       ├── briefing_job.py
+│   │   │       ├── cargo_check_job.py
+│   │   │       └── stock_check_job.py
+│   │   └── core/
+│   │       ├── config.py
+│   │       ├── security.py
+│   │       ├── database.py
+│   │       └── redis.py            # Yeni
 │   ├── alembic/
-│   │   ├── versions/            # Migration dosyaları
-│   │   └── env.py
-│   ├── .env                     # Ortam değişkenleri (git'e eklenmez)
-│   ├── .env.example             # Örnek env (git'e eklenir)
+│   ├── .env.example
 │   └── requirements.txt
 │
 ├── README.md
-├── MVP.md                       # Bu dosya
-└── PRD.md                       # Bu dosya
+├── MVP.md
+├── PRD.md
+└── PLAN.md
 ```
 
 ---
 
-## 10. Ortam Değişkenleri
+## 10. Ortam Değişkenleri (Güncellenmiş)
 
 ```bash
 # backend/.env.example
 
-DATABASE_URL=postgresql://kullanici:sifre@localhost:5432/localshop
-SECRET_KEY=cok-gizli-jwt-anahtari-buraya
+# Veritabanı
+DATABASE_URL=postgresql://localshop_user:sifre@localhost:5432/localshop
+REDIS_URL=redis://localhost:6379/0
+
+# Auth
+SECRET_KEY=en-az-32-karakter-gizli-anahtar
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
-GEMINI_API_KEY=buraya-gemini-api-anahtarini-gir
+# AI
+GEMINI_API_KEY=gemini-api-anahtariniz
 
-CORS_ORIGINS=["http://localhost:3000", "https://localshop.com"]
+# Kargo
+YURTICI_API_KEY=yurtici-api-anahtari
+YURTICI_API_URL=https://api.yurticikargo.com
+PTT_API_KEY=ptt-api-anahtari
+
+# Bildirim
+SENDGRID_API_KEY=sendgrid-api-anahtariniz
+ADMIN_EMAIL=admin@localshop.com
+FROM_EMAIL=noreply@localshop.com
+
+# WhatsApp
+WHATSAPP_TOKEN=meta-whatsapp-token
+WHATSAPP_VERIFY_TOKEN=webhook-dogrulama-tokeni
+WHATSAPP_PHONE_ID=whatsapp-telefon-id
+
+# App
+CORS_ORIGINS=["http://localhost:3000","https://localshop.com"]
+BRIEFING_CRON_HOUR=8
+CARGO_CHECK_INTERVAL_HOURS=2
 ```
 
 ---
 
-## 11. Geliştirme Aşamaları
+## 11. Değerlendirme Kriterleri Karşılama
 
-| Aşama | İçerik | Durum |
-|---|---|---|
-| **1 — Sunucu Kurulumu** | Ubuntu, PostgreSQL, Python, Nginx, Node.js | ⬜ Bekliyor |
-| **2 — Backend İskeleti** | FastAPI + SQLAlchemy + Alembic, ilk migration, GET /api/urunler | ⬜ Bekliyor |
-| **3 — Authentication** | JWT login/register, roller, korumalı endpoint'ler | ⬜ Bekliyor |
-| **4 — Tüm API Endpoint'leri** | Ürün CRUD, Kategori CRUD, Sipariş, AI endpoint | ⬜ Bekliyor |
-| **5 — Frontend** | React + TailwindCSS, vitrin sayfaları, admin paneli, API bağlantısı | ⬜ Bekliyor |
-| **6 — Deploy** | React build, Nginx config, Systemd, SSL (Let's Encrypt) | ⬜ Bekliyor |
-| **7 — Dokümantasyon** | README, yansıtma raporu, video demo | ⬜ Bekliyor |
-
----
-
-## 12. Kapsam Dışı (v2 Planı)
-
-| Özellik | Hedef Sürüm |
+| Değerlendirme Kriteri | LocalShop Karşılığı |
 |---|---|
-| Ödeme sistemi (iyzico / Stripe) | v2 |
-| E-posta bildirimleri (sipariş onayı) | v2 |
-| Çok-tenant mimari (birden fazla işletme) | v2 |
-| Ürün yorumları & puanlama | v2 |
-| Gelişmiş dashboard (Chart.js grafikleri) | v2 |
-| Kargo takip entegrasyonu | v2 |
-| Mobil uygulama (React Native) | v3 |
+| AI ajanları tasarımı | 5 agent (Customer, Cargo, Stock, Workflow, Analytics) |
+| Doğal dil işleme | CustomerAgent — Gemini ile niyet sınıflandırma |
+| Veri ile etkileşim (RAG) | Agent'lar DB + geçmiş veriyi bağlam olarak Gemini'ye iletir |
+| Harici sistem entegrasyonu | Kargo API + SendGrid + WhatsApp API |
+| Aksiyon alabilen sistemler | Otomatik bildirim, yenileme önerisi, briefing gönderimi |
+| İnsan müdahalesini azaltma | Kargo + stok + briefing tamamen otomatik |
+| Kullanıcı deneyimi | Chat widget, dashboard briefing, anlık uyarılar |
 
 ---
 
-## 13. Teknik Borç & Notlar
-
-- Ürün görselleri MVP'de URL ile eklenir; v2'de dosya yükleme (S3/Cloudflare R2) eklenecek
-- Sepet MVP'de `localStorage`'da tutulur; v2'de backend'e taşınacak (oturum sürekliliği)
-- Rate limiting MVP'de yok; v2'de `slowapi` ile eklenecek
-- Unit test MVP'de yok; v2'de `pytest` ile kritik servisler test edilecek
-
----
-
-*LocalShop PRD v1.0 — 2026*
+*LocalShop PRD v2.0 — 2025–2026*

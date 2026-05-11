@@ -1,313 +1,298 @@
 ---
 name: LocalShop plan
 overview: >
-  Küçük ve yerel işletmeler için komisyonsuz dijital vitrin & sipariş sistemi.
-  React + FastAPI + PostgreSQL tabanlı full-stack web uygulaması.
-  Gemini AI destekli ürün açıklama üreteci özgün özellik olarak entegre edilecek.
-  Hostinger VPS (Ubuntu 24.04) üzerinde Nginx + Systemd ile production deploy hedeflenmektedir.
+  Küçük ve yerel işletmeler için AI-agent destekli dijital vitrin & operasyon otomasyon platformu.
+  React + FastAPI + PostgreSQL + Gemini API tabanlı full-stack uygulama.
+  Hackathon kapsamında CustomerAgent (WhatsApp/chat), CargoAgent (kargo takip),
+  StockAgent (stok uyarı), WorkflowAgent (sabah briefing) ve AnalyticsAgent ekleniyor.
+  Hostinger VPS (Ubuntu 24.04) üzerinde Nginx + Systemd + APScheduler + Redis ile
+  production deploy hedeflenmektedir.
 todos:
   - id: confirm-stack
-    content: React + FastAPI + PostgreSQL + Gemini API tabanlı mimariyi onayla
+    content: React + FastAPI + PostgreSQL + Redis + Gemini API mimarisini onayla
     status: completed
   - id: write-docs
-    content: MVP, PRD ve PLAN dokümanlarını oluştur; GitHub reposuna ekle
+    content: MVP v2, PRD v2 ve PLAN v2 belgelerini oluştur; hackathon kapsamı entegre edildi
     status: completed
   - id: server-setup
     content: >
-      VPS kurulumu: Ubuntu 24.04, PostgreSQL, Python 3.11, Nginx, Node.js 20,
-      UFW güvenlik duvarı, PostgreSQL kullanıcısı ve veritabanı oluşturma
+      VPS kurulumu: Ubuntu 24.04, PostgreSQL, Redis, Python 3.11, Nginx, Node.js 20,
+      UFW, PostgreSQL ve Redis kullanıcısı/veritabanı oluşturma
     status: pending
   - id: backend-scaffold
     content: >
-      FastAPI + SQLAlchemy + Alembic iskelet kurulumu:
-      klasör yapısı, config, database bağlantısı, ilk migration,
-      healthcheck endpoint, Swagger doğrulama
+      FastAPI + SQLAlchemy + Alembic + APScheduler iskelet:
+      tüm modeller (mevcut + 5 yeni tablo), migration, healthcheck,
+      Redis bağlantısı, Swagger doğrulama
     status: pending
   - id: build-auth
-    content: >
-      JWT tabanlı kimlik doğrulama: kayıt, giriş, token yenileme,
-      admin/musteri rol ayrımı, korumalı endpoint dekoratörleri
+    content: JWT kayıt/giriş/yenileme, admin/musteri rolleri, korumalı endpoint'ler
     status: pending
-  - id: build-product-api
+  - id: build-core-api
     content: >
-      Ürün ve kategori CRUD endpoint'leri: listeleme (filtre + arama + sayfalama),
-      detay, ekleme, güncelleme, soft-delete, stok güncelleme
+      Temel e-ticaret API: kategori CRUD, ürün CRUD (filtre+arama+sayfalama+stok_esigi),
+      sipariş oluşturma (stok kontrolü + kargo_no alanı), sipariş yönetimi,
+      Gemini AI açıklama endpoint'i
     status: pending
-  - id: build-order-api
+  - id: build-customer-agent
     content: >
-      Sipariş akışı API: sipariş oluşturma (stok kontrolü + otomatik düşme),
-      sipariş listeleme (admin tümü / müşteri kendisi), durum güncelleme
+      CustomerAgent: POST /api/agent/chat, Gemini niyet sınıflandırma
+      (sipariş_sorgu / stok_sorgu / genel), konuşma hafızası (Redis),
+      agent_konusmalar tablosu, yanıt süresi ≤3sn
     status: pending
-  - id: build-ai-endpoint
+  - id: build-cargo-agent
     content: >
-      Gemini AI entegrasyonu: POST /api/ai/aciklama-olustur endpoint'i,
-      ürün adı + fiyat → Türkçe profesyonel açıklama, API key güvenliği
+      CargoAgent: Yurtiçi Kargo API entegrasyonu, kargo_takip tablosu,
+      APScheduler her 2 saatte kargo durum kontrolü, gecikme tespiti,
+      müşteriye + admin'e otomatik e-posta (SendGrid)
+    status: pending
+  - id: build-stock-agent
+    content: >
+      StockAgent: sipariş oluşturulunca eşik kontrolü, stok_uyarilari tablosu,
+      admin e-posta + dashboard uyarısı, Gemini yenileme miktarı önerisi,
+      GET /api/stock/alerts endpoint'i
+    status: pending
+  - id: build-workflow-agent
+    content: >
+      WorkflowAgent: APScheduler sabah 08:00 briefing cron,
+      günlük sipariş + paket + stok özeti, SendGrid e-posta gönderimi,
+      briefing_gecmisi tablosu, GET /api/workflow/briefing/today endpoint'i
+    status: pending
+  - id: build-analytics-agent
+    content: >
+      AnalyticsAgent (opsiyonel): 30 günlük satış trend analizi,
+      Gemini ile stok tahmini, GET /api/analytics/insights endpoint'i,
+      analitik_ozet tablosu
+    status: pending
+  - id: build-whatsapp-webhook
+    content: >
+      WhatsApp Business API webhook: Meta doğrulama, gelen mesaj parse,
+      CustomerAgent'a yönlendirme, yanıt gönderimi
     status: pending
   - id: build-frontend-shell
     content: >
-      React + TailwindCSS uygulama kabuğu: React Router kurulumu,
-      AuthContext, CartContext, Navbar, Footer, sayfa iskeletleri
+      React + TailwindCSS uygulama kabuğu: React Router, AuthContext, CartContext,
+      agentService/cargoService/analyticsService, Navbar, Footer
     status: pending
   - id: build-customer-ui
     content: >
-      Müşteri arayüzü: vitrin, ürün listesi (filtre/arama), ürün detay,
-      sepet, sipariş oluşturma, profil/sipariş geçmişi sayfaları
+      Müşteri arayüzü: vitrin, ürün listesi, ürün detay, sepet, sipariş,
+      profil/sipariş geçmişi, ChatWidget bileşeni (CustomerAgent)
     status: pending
   - id: build-admin-ui
     content: >
-      Admin paneli: dashboard, ürün listesi/ekle/düzenle (AI butonu dahil),
-      sipariş listesi/detay/durum güncelleme, kategori yönetimi
+      Admin paneli: dashboard (briefing widget + stok uyarı badge + analitik),
+      ürün listesi/ekle/düzenle (AI butonu), sipariş listesi/detay,
+      kargo takip görünümü, stok uyarıları sayfası, analitik sekmesi
     status: pending
   - id: api-integration
     content: >
-      Frontend–backend bağlantısı: axios instance, interceptor (token ekleme/yenileme),
-      tüm servis fonksiyonları, loading/error state yönetimi
+      Frontend-backend bağlantısı: axios interceptor (token + refresh),
+      tüm servis fonksiyonları, loading/error state, agent chat entegrasyonu
     status: pending
   - id: deploy
     content: >
-      Production deploy: React build, Nginx config, FastAPI Systemd servisi,
-      Let's Encrypt SSL sertifikası, ortam değişkenleri, smoke test
+      Production deploy: React build, Nginx config, FastAPI+APScheduler Systemd servisi,
+      Redis servisi, Let's Encrypt SSL, env değişkenleri, smoke test
     status: pending
   - id: write-readme
     content: >
-      README.md: proje amacı, kurulum talimatları, klasör yapısı,
-      teknoloji listesi, AI kullanım açıklaması, ekran görüntüleri
+      README.md: proje amacı, hackathon kapsamı, kurulum talimatları, agent mimarisi,
+      klasör yapısı, ortam değişkenleri, teknoloji listesi
     status: pending
   - id: reflection-report
     content: >
       Yansıtma raporu: AI kullanılan aşamalar, işe yarayan promptlar,
-      değiştirilen kodlar, düzeltilen hatalar, özgün katkılar
+      değiştirilen kodlar, özgün katkılar, hackathon uyumu
     status: pending
   - id: video-demo
-    content: 8–10 dakikalık YouTube video demo hazırlama ve link paylaşımı
+    content: 8–10 dakikalık YouTube video demo — agent senaryoları dahil
     status: pending
 isProject: true
 ---
 
-# LocalShop — Geliştirme Planı
+# LocalShop — Geliştirme Planı v2.0
 
 ## Proje Özeti
 
-**LocalShop**, Türkiye'deki küçük ve yerel işletmelerin (kafe, butik, market, pastane vb.)
-komisyon ödemeden kendi dijital vitrinlerini kurmalarını ve sipariş almalarını sağlayan
-bir web uygulamasıdır.
+**LocalShop**, Türkiye'deki küçük işletmelerin komisyon ödemeden kendi dijital vitrinlerini kurabilecekleri, **AI destekli otomasyon ile** sipariş/stok/kargo süreçlerini otomatikleştirebildikleri bir platform.
 
-Mevcut durum: WhatsApp/telefon üzerinden alınan siparişler takip edilemiyor, stok bilgisi
-anlık güncellenemiyor. Büyük e-ticaret platformları yüksek komisyon alıyor ve küçük esnaf
-için gereksiz karmaşıklık yaratıyor. LocalShop bu boşluğu doldurmayı hedefliyor.
+### Hackathon Boyutu
+KOBİ operasyon otomasyonu hackathonuna katılım kapsamında proje genişletildi:
+- **Müşteri iletişimi otomasyonu** → CustomerAgent
+- **Kargo süreç yönetimi** → CargoAgent
+- **Stok & envanter yönetimi** → StockAgent
+- **İş akışı otomasyonu** → WorkflowAgent (sabah briefing)
+- **Analitik & içgörü** → AnalyticsAgent (opsiyonel)
 
 ## Varsayımlar
 
-- İlk sürüm tek işletme odaklı (tek-tenant); çok-tenant v2'ye bırakıldı.
-- Ürün görselleri MVP'de URL ile eklenir; dosya yükleme v2'de gelecek.
-- Sepet verisi MVP'de `localStorage`'da tutulur; backend'e taşıma v2'de.
-- AI özelliği için Google Gemini API `gemini-2.0-flash` modeli kullanılır (ücretsiz tier yeterli).
-- Ödeme entegrasyonu MVP kapsamında değil; v2'de iyzico/Stripe planlanıyor.
-- Deploy hedefi: Hostinger VPS KVM 2 — Ubuntu 24.04 LTS, Avrupa lokasyonu.
+- İlk sürüm tek işletme (tek-tenant); çok-tenant v2'ye bırakıldı.
+- Gemini API gemini-2.0-flash modeli — ücretsiz tier yeterli.
+- Kargo entegrasyonu Yurtiçi Kargo öncelikli; PTT/Aras eklenti.
+- WhatsApp webhook MVP'de altyapısı kurulur, tam entegrasyon v1.1.
+- E-posta bildirimleri SendGrid üzerinden.
+- APScheduler FastAPI içinde çalışır; ayrı Celery worker gerektirmez.
 
 ## Kullanıcı Rolleri
 
 | Rol | Açıklama |
 |---|---|
-| `admin` | İşletme sahibi. Ürün, kategori ve sipariş yönetimi. AI aracına erişim. |
-| `musteri` | Son kullanıcı. Vitrin görüntüleme, sepet ve sipariş. |
+| `admin` | İşletme sahibi. Tüm yönetim + AI agent araçları. |
+| `musteri` | Son kullanıcı. Vitrin, sepet, sipariş, chat agent. |
+| `scheduler` | APScheduler otomatik görevler (sistem içi). |
 
-## Mutlaka Olması Gerekenler
-
-- Kullanıcı kaydı, girişi ve JWT tabanlı rol yönetimi
-- Ürün vitrini: listeleme, kategoriye göre filtreleme, ada göre arama, detay sayfası
-- Admin ürün yönetimi: ekle / düzenle / sil (soft delete) / stok güncelle
-- Sepet: ürün ekle / çıkar / miktar güncelle
-- Sipariş: oluşturma (stok kontrolü), durum takibi (bekliyor → teslim)
-- Admin sipariş yönetimi: listeleme, detay görüntüleme, durum güncelleme
-- **Gemini AI:** ürün adı + fiyat → Türkçe profesyonel açıklama önerisi
-- Güvenlik: bcrypt, CORS, JWT expiry, API key backend'de saklama, SQL injection koruması
-- Production deploy: Nginx, HTTPS, Systemd
-
-## Teknik Mimari
+## Agent Mimarisi
 
 ```
-Browser
-  │
-  ▼
-Nginx (80 / 443)
-  ├── /          →  React static build (/var/www/localshop/frontend)
-  └── /api       →  FastAPI (localhost:8000, Uvicorn)
-                        │
-                        ├── SQLAlchemy ORM
-                        │       └── PostgreSQL (localhost:5432)
-                        │
-                        └── Gemini API (external, HTTPS)
+Gemini Agent Core (Orchestrator)
+│
+├── CustomerAgent
+│   ├── Niyet: sipariş_sorgu → siparisler tablosu + kargo_takip
+│   ├── Niyet: stok_sorgu → urunler tablosu
+│   └── Niyet: genel → Gemini serbest yanıt
+│
+├── CargoAgent
+│   ├── APScheduler her 2 saatte: tüm aktif siparişleri kontrol
+│   ├── Gecikme var → müşteri e-posta (SendGrid)
+│   └── Gecikme var → admin özet rapor
+│
+├── StockAgent
+│   ├── Tetikleyici: sipariş oluşturma (synchronous)
+│   ├── stok < stok_esigi → stok_uyarilari kayıt
+│   ├── → Admin e-posta + dashboard
+│   └── Gemini: geçmiş satış → yenileme önerisi
+│
+├── WorkflowAgent
+│   ├── APScheduler her gün 08:00
+│   ├── Bugünkü siparişler + hazır paketler + kritik stoklar
+│   ├── → Admin e-posta briefing
+│   └── → briefing_gecmisi kayıt
+│
+└── AnalyticsAgent (opsiyonel)
+    ├── Son 30 gün satış verisi analizi
+    ├── Gemini: önümüzdeki hafta tahmin
+    └── → analitik_ozet kayıt
 ```
 
 ## Teknik Stack
 
 | Katman | Teknoloji | Gerekçe |
 |---|---|---|
-| Frontend | React 18 + TailwindCSS | Bileşen tabanlı UI, hızlı geliştirme |
-| Backend | Python 3.11 + FastAPI | Async, otomatik Swagger, Python bilgisi |
-| Veritabanı | PostgreSQL 15 | İlişkisel yapı, transaction desteği |
-| ORM | SQLAlchemy 2.x + Alembic | Güvenli sorgu, migration yönetimi |
-| Auth | JWT (python-jose) + bcrypt | Stateless, rol bazlı erişim |
-| AI | Google Gemini API | Ücretsiz tier, Türkçe içerik üretimi |
-| Proxy | Nginx | Reverse proxy, static serve, SSL |
-| Süreç | Uvicorn + Systemd | 7/24 çalışma, otomatik yeniden başlatma |
-| SSL | Let's Encrypt (Certbot) | Ücretsiz, otomatik yenileme |
+| Frontend | React 18 + TailwindCSS | Bileşen tabanlı, hızlı geliştirme |
+| Backend | Python 3.11 + FastAPI | Async, Swagger, Python bilgisi |
+| Veritabanı | PostgreSQL 15 | İlişkisel veri + transaction |
+| Önbellek/Kuyruk | Redis | Agent session cache, bildirim kuyruğu |
+| ORM | SQLAlchemy 2.x + Alembic | Güvenli ORM + migration |
+| Auth | JWT + bcrypt | Stateless, rol bazlı |
+| AI Orchestrator | Google Gemini API (flash 2.0) | Tüm agent beyni |
+| Zamanlayıcı | APScheduler | Cron görevleri |
+| Kargo | Yurtiçi API + PTT | Kargo takibi |
+| E-posta | SendGrid | Otomatik bildirimler |
+| WhatsApp | Meta Business API | Müşteri iletişim kanalı |
+| Proxy | Nginx | Reverse proxy + SSL |
+| Süreç | Uvicorn + Systemd | Production 7/24 |
 
-## Veri Modeli
-
-```
-users               id, email, password_hash, rol, isim, telefon, created_at
-kategoriler         id, isim, slug, created_at
-urunler             id, isim, aciklama, fiyat, stok, kategori_id, resim_url, aktif, created_at
-siparisler          id, user_id, toplam_tutar, durum, adres, not, created_at, updated_at
-siparis_kalemleri   id, siparis_id, urun_id, adet, birim_fiyat
-```
-
-```mermaid
-erDiagram
-    users ||--o{ siparisler : "verir"
-    siparisler ||--|{ siparis_kalemleri : "içerir"
-    urunler ||--o{ siparis_kalemleri : "yer alır"
-    kategoriler ||--o{ urunler : "gruplar"
-```
-
-## API Endpoint Özeti
+## Veri Modeli Özeti
 
 ```
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/refresh
+-- Mevcut (değişen)
+urunler       + stok_esigi alanı
+siparisler    + kargo_no alanı
 
-GET    /api/urunler                  filtre: kategori, q, sayfa
-GET    /api/urunler/:id
-POST   /api/urunler                  [admin]
-PUT    /api/urunler/:id              [admin]
-DELETE /api/urunler/:id              [admin]
-
-GET    /api/kategoriler
-POST   /api/kategoriler              [admin]
-PUT    /api/kategoriler/:id          [admin]
-DELETE /api/kategoriler/:id          [admin]
-
-GET    /api/siparisler               [admin] tümü
-GET    /api/siparisler/benim         [musteri] kendisi
-GET    /api/siparisler/:id
-POST   /api/siparisler               [musteri]
-PATCH  /api/siparisler/:id/durum     [admin]
-
-POST   /api/ai/aciklama-olustur      [admin]
-```
-
-## Klasör Yapısı
-
-```
-localshop/
-├── frontend/
-│   └── src/
-│       ├── components/
-│       │   ├── ui/              # Button, Input, Card, Badge
-│       │   ├── layout/          # Navbar, Footer, AdminLayout
-│       │   └── product/         # ProductCard, ProductList, FilterBar
-│       ├── pages/
-│       │   ├── public/          # Home, Products, ProductDetail, Cart, Order
-│       │   └── admin/           # Dashboard, Products, Orders, Categories
-│       ├── hooks/               # useCart, useAuth, useProducts
-│       ├── services/            # api.js, authService, productService
-│       ├── context/             # AuthContext, CartContext
-│       └── utils/               # formatPrice, validators
-│
-├── backend/
-│   ├── app/
-│   │   ├── models/              # user, product, order, category
-│   │   ├── schemas/             # Pydantic request & response
-│   │   ├── routers/             # auth, products, orders, categories, ai
-│   │   ├── services/            # auth_service, ai_service
-│   │   ├── core/                # config, security, database
-│   │   └── main.py
-│   ├── alembic/
-│   ├── .env.example
-│   └── requirements.txt
-│
-├── MVP.md
-├── PRD.md
-├── PLAN.md
-└── README.md
+-- Yeni
+kargo_takip         siparis_id, firma, takip_no, durum, gecikme_var
+agent_konusmalar    user_id, session_id, mesajlar (JSONB), kanal
+stok_uyarilari      urun_id, esik, mevcut_stok, oneri, durum
+briefing_gecmisi    tarih, icerik (JSONB), gonderildi
+analitik_ozet       tip, baslangic/bitis, veriler (JSONB)
 ```
 
 ## Geliştirme Fazları
 
 ### Faz 1 — Sunucu Kurulumu
-- Ubuntu 24.04 paket güncellemesi
-- PostgreSQL kurulumu, veritabanı ve kullanıcı oluşturma
-- Python 3.11, pip, venv kurulumu
-- Node.js 20 kurulumu
-- Nginx kurulumu ve varsayılan sayfa doğrulama
-- UFW güvenlik duvarı (22, 80, 443 açık)
+- Ubuntu 24.04 güncellemesi
+- PostgreSQL + Redis kurulum ve yapılandırma
+- Python 3.11, Node.js 20, Nginx
+- UFW: 22, 80, 443 açık
 
 ### Faz 2 — Backend İskeleti
-- FastAPI proje yapısı ve sanal ortam
-- SQLAlchemy bağlantısı ve `database.py`
-- Pydantic `config.py` ve `.env` okuma
-- Tüm SQLAlchemy modelleri
-- Alembic ilk migration ve uygulama
-- `GET /api/healthcheck` — Swagger'da doğrulama
+- FastAPI + SQLAlchemy + Alembic + Redis bağlantısı
+- Tüm modeller (mevcut + 5 yeni tablo)
+- APScheduler entegrasyonu (başlangıç skeleton)
+- Alembic migration ve uygulama
+- GET /api/healthcheck → tüm servisleri kontrol
 
 ### Faz 3 — Authentication
-- `POST /api/auth/register` — bcrypt hash
-- `POST /api/auth/login` — JWT access + refresh token
-- `POST /api/auth/refresh` — token yenileme
-- `get_current_user` ve `require_admin` bağımlılıkları
-- Korumalı endpoint testi
+- Register / login / refresh endpoint'leri
+- JWT dependency'leri + rol koruma
 
-### Faz 4 — Tüm API Endpoint'leri
-- Kategori CRUD
-- Ürün CRUD (soft delete, stok güncelleme, filtre + arama + sayfalama)
-- Sipariş oluşturma (stok kontrolü + düşme transaction'ı)
-- Sipariş listeleme ve durum güncelleme
-- `POST /api/ai/aciklama-olustur` — Gemini entegrasyonu
+### Faz 4 — Temel E-ticaret API
+- Kategori + Ürün CRUD (stok_esigi alanıyla)
+- Sipariş oluşturma (kargo_no alanıyla)
+- Sipariş yönetimi ve durum akışı
+- Gemini AI açıklama endpoint'i
 
-### Faz 5 — Frontend
-- React + TailwindCSS kurulumu, React Router
-- AuthContext (token saklama, korumalı route)
-- CartContext (localStorage)
-- Axios instance (interceptor: token ekleme, 401 refresh)
-- Tüm müşteri sayfaları
-- Tüm admin sayfaları (AI butonu dahil)
+### Faz 5 — Agent Katmanı
+- Gemini orchestrator core
+- CustomerAgent (niyet sınıflandırma + sorgu)
+- StockAgent (eşik kontrolü + yenileme önerisi)
+- CargoAgent (Yurtiçi API + gecikme tespiti)
+- WorkflowAgent (briefing oluşturma)
+- AnalyticsAgent (opsiyonel)
+- APScheduler cron görevleri
 
-### Faz 6 — Deploy
-- `npm run build` → `/var/www/localshop/frontend`
-- Nginx konfigürasyonu (/ → React, /api → FastAPI)
-- Uvicorn Systemd servis dosyası
-- Certbot ile Let's Encrypt SSL
-- Production smoke testi
+### Faz 6 — Bildirim & Entegrasyonlar
+- SendGrid e-posta servisi
+- Otomatik bildirim tetikleyicileri
+- WhatsApp webhook altyapısı
 
-### Faz 7 — Dokümantasyon & Teslim
-- `README.md` (kurulum, çalıştırma, mimari, AI açıklaması)
-- Yansıtma raporu
-- YouTube video demo (8–10 dk)
-- GitHub repo düzeni ve `.zip` teslimi
+### Faz 7 — Frontend
+- React + TailwindCSS + Router kurulumu
+- AuthContext + CartContext
+- Axios interceptor + tüm servis dosyaları
+- Müşteri sayfaları + ChatWidget
+- Admin paneli (briefing widget + stok badge + analitik)
 
-## MVP Sonrası (v2) Yol Haritası
+### Faz 8 — Deploy
+- React build + Nginx konfigürasyonu
+- FastAPI + APScheduler Systemd servisi
+- Redis Systemd servisi
+- Let's Encrypt SSL
+- Production smoke testi (tüm agent senaryoları)
 
-| Özellik | Faz |
-|---|---|
-| Ürün görseli dosya yükleme (Cloudflare R2) | v2 |
-| Ödeme sistemi (iyzico) | v2 |
-| E-posta bildirimleri (sipariş onayı) | v2 |
-| Çok-tenant mimari | v2 |
-| Gelişmiş admin dashboard (Chart.js) | v2 |
-| Rate limiting (slowapi) | v2 |
-| Unit testler (pytest) | v2 |
-| Kargo takip entegrasyonu | v3 |
-| Mobil uygulama (React Native) | v3 |
+
+## Kapsam Haritası
+
+| Kapsam Alanı | LocalShop Çözümü | Durum |
+|---|---|---|
+| Müşteri İletişimi Otomasyonu | CustomerAgent + WhatsApp | Faz 5-6 |
+| Ürün ve Sipariş Takibi | Temel API + CustomerAgent | Faz 4-5 |
+| Kargo Süreç Yönetimi | CargoAgent + APScheduler | Faz 5-6 |
+| Stok ve Envanter Yönetimi | StockAgent + eşik sistemi | Faz 5 |
+| İş Akışı ve Görev Yönetimi | WorkflowAgent + briefing | Faz 5-6 |
+| Analitik ve İçgörü (Opsiyonel) | AnalyticsAgent | Faz 5 |
 
 ## Başarı Kriterleri
 
-- [ ] Admin giriş yapabilir, ürün ekleyebilir, AI açıklama üreteci çalışır
-- [ ] Müşteri kayıt olabilir, ürün listesini görür, arama/filtre kullanabilir
-- [ ] Müşteri sepete ürün ekleyip sipariş oluşturabilir
-- [ ] Admin siparişi görüp durumunu güncelleyebilir
-- [ ] Müşteri sipariş geçmişini görebilir
+- [ ] Admin giriş + ürün ekle + AI açıklama üreteci çalışır
+- [ ] Müşteri chat'te "siparişim nerede?" yazınca otomatik yanıt alır
+- [ ] Kargo gecikmesi → müşteri + admin otomatik bildirim alır
+- [ ] Stok eşiği aşılınca admin uyarı + Gemini yenileme önerisi alır
+- [ ] Her sabah 08:00 admin briefing e-postası alır
+- [ ] Admin dashboard'da analitik özet ve stok uyarıları görünür
 - [ ] Tüm akış VPS'te HTTPS üzerinden çalışır
-- [ ] README kurulum talimatları ile proje sıfırdan ayağa kaldırılabilir
+- [ ] README kurulum talimatlarıyla proje sıfırdan ayağa kalkar
+
+## MVP Sonrası (v2) Yol Haritası
+
+| Özellik | Versiyon |
+|---|---|
+| WhatsApp Business API tam entegrasyon | v1.1 |
+| Çoklu kargo firması otomatik seçimi | v1.1 |
+| Ödeme sistemi (iyzico) | v2 |
+| SMS bildirimleri (Twilio) | v2 |
+| Çok-tenant mimari | v2 |
+| Gelişmiş ML tahmin modeli | v2 |
+| WebSocket canlı bildirimler | v2 |
+| Mobil uygulama (React Native) | v3 |

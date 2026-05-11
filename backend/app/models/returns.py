@@ -60,8 +60,8 @@ class Iade(Base):
     )
 
     # İlişkiler
-    siparis = relationship("Siparis", backref="iadeler")
-    user = relationship("User")
+    siparis: Mapped["Siparis"] = relationship("Siparis", backref="iadeler")
+    user: Mapped["User"] = relationship("User")
 
     def __repr__(self) -> str:
         return f"<Iade(id={self.id}, iade_no={self.iade_no}, durum={self.durum})>"

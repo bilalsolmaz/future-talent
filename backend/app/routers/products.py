@@ -4,8 +4,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import cast
-from sqlalchemy.dialects.postgresql import JSONB
 from typing import List, Optional
 
 from app.core.database import get_db

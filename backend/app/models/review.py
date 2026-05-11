@@ -37,8 +37,8 @@ class Yorum(Base):
     )
 
     # İlişkiler
-    user = relationship("User")
-    urun = relationship("Urun", backref="yorumlar")
+    user: Mapped["User"] = relationship("User")
+    urun: Mapped["Urun"] = relationship("Urun", backref="yorumlar")
 
     def __repr__(self) -> str:
         return f"<Yorum(id={self.id}, puan={self.puan}, user_id={self.user_id})>"

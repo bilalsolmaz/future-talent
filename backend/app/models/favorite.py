@@ -25,8 +25,8 @@ class Favori(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-    user = relationship("User")
-    urun = relationship("Urun", backref="favoriler")
+    user: Mapped["User"] = relationship("User")
+    urun: Mapped["Urun"] = relationship("Urun", backref="favoriler")
 
     def __repr__(self) -> str:
         return f"<Favori(user_id={self.user_id}, urun_id={self.urun_id})>"

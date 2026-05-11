@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Package, Clock, CheckCircle2, XCircle, RotateCcw, 
   ChevronDown, ChevronUp, AlertTriangle, Send, FileText,
-  Bell, PartyPopper, ShieldX, Info, Settings, Lock, User as UserIcon, Save
+  PartyPopper, ShieldX, Info, Settings, Lock, User as UserIcon, Save
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -45,12 +45,6 @@ const Profile = () => {
   const [returnSuccess, setReturnSuccess] = useState('');
   const [returnError, setReturnError] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -66,6 +60,12 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleReturnSubmit = async (e) => {
     e.preventDefault();
@@ -120,20 +120,6 @@ const Profile = () => {
     );
   };
 
-  const getReturnStatusBadge = (status) => {
-    const config = {
-      bekliyor: { icon: Clock, label: 'İnceleniyor', cls: 'bg-amber-100 text-amber-800' },
-      onaylandi: { icon: CheckCircle2, label: 'Onaylandı', cls: 'bg-green-100 text-green-800' },
-      reddedildi: { icon: XCircle, label: 'Reddedildi', cls: 'bg-red-100 text-red-800' },
-    };
-    const c = config[status] || config.bekliyor;
-    const Icon = c.icon;
-    return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${c.cls}`}>
-        <Icon size={14} /> {c.label}
-      </span>
-    );
-  };
 
   if (!user) return null;
 

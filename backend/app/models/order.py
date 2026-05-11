@@ -58,8 +58,8 @@ class Siparis(Base):
     )
 
     # İlişkiler
-    user = relationship("User")
-    kalemler = relationship(
+    user: Mapped["User"] = relationship("User")
+    kalemler: Mapped[list["SiparisKalemi"]] = relationship(
         "SiparisKalemi",
         back_populates="siparis",
         cascade="all, delete-orphan",
@@ -91,8 +91,8 @@ class SiparisKalemi(Base):
     birim_fiyat: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
     # İlişkiler
-    siparis = relationship("Siparis", back_populates="kalemler")
-    urun = relationship("Urun", back_populates="siparis_kalemleri")
+    siparis: Mapped["Siparis"] = relationship("Siparis", back_populates="kalemler")
+    urun: Mapped["Urun"] = relationship("Urun", back_populates="siparis_kalemleri")
 
     def __repr__(self) -> str:
         return f"<SiparisKalemi(urun_id={self.urun_id}, adet={self.adet})>"

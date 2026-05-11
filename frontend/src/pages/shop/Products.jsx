@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, SlidersHorizontal, PackageOpen } from 'lucide-react';
 import api from '../../services/api';
@@ -7,10 +7,22 @@ import ProductCard from '../../components/ProductCard';
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [dynamicFiltersOptions, setDynamicFiltersOptions] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   
-  // URL parametreleri ile senkronize
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  const STANDARD_PARAMS = useMemo(() => ['q', 'kategori_id', 'siralama', 'min_fiyat', 'max_fiyat'], []);
+  
+  const getSelectedDynamicFilters = useCallback(() => {
+    const filters = {};
+    for (const [key, value] of searchParams.entries()) {
+      if (!STANDARD_PARAMS.includes(key)) {
+        filters[key] = value;
+      }
+    }
+    return filters;
+  }, [searchParams, STANDARD_PARAMS]);
   const urlQuery = searchParams.get('q') || '';
   const urlCategoryId = searchParams.get('kategori_id') || '';
   const urlSiralama = searchParams.get('siralama') || '';
@@ -21,6 +33,7 @@ const Products = () => {
   const [minFiyat, setMinFiyat] = useState(urlMinFiyat);
   const [maxFiyat, setMaxFiyat] = useState(urlMaxFiyat);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setSearchQuery(urlQuery);
     setMinFiyat(urlMinFiyat);
@@ -40,6 +53,21 @@ const Products = () => {
     fetchCategories();
   }, []);
 
+  // Kategori değiştiğinde dinamik filtreleri getir
+  useEffect(() => {
+    const fetchDynamicFilters = async () => {
+      try {
+        const url = urlCategoryId ? `/urunler/filtreler?kategori_id=${urlCategoryId}` : '/urunler/filtreler';
+        const response = await api.get(url);
+        setDynamicFiltersOptions(response.data);
+      } catch (error) {
+        console.error('Dinamik filtreler yüklenirken hata:', error);
+      }
+    };
+    fetchDynamicFilters();
+  }, [urlCategoryId]);
+
+  // Ürünleri getir (URL parametreleri değiştiğinde)
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
@@ -51,6 +79,12 @@ const Products = () => {
         if (urlMinFiyat) params.append('min_fiyat', urlMinFiyat);
         if (urlMaxFiyat) params.append('max_fiyat', urlMaxFiyat);
 
+        // Dinamik filtreleri parametrelere ekle
+        const dynamicFilters = getSelectedDynamicFilters();
+        Object.entries(dynamicFilters).forEach(([key, value]) => {
+          params.append(key, value);
+        });
+
         const response = await api.get(`/urunler/?${params.toString()}`);
         setProducts(response.data);
       } catch (error) {
@@ -60,9 +94,9 @@ const Products = () => {
       }
     };
     fetchProducts();
-  }, [urlQuery, urlCategoryId, urlSiralama, urlMinFiyat, urlMaxFiyat]);
+  }, [urlQuery, urlCategoryId, urlSiralama, urlMinFiyat, urlMaxFiyat, getSelectedDynamicFilters]);
 
-  // Arama formu gönderildiğinde URL'yi güncelle
+  // URL parametrelerini oluştururken yardımcı fonksiyon
   const buildParams = (overrides = {}) => {
     const p = {};
     if (urlQuery) p.q = urlQuery;
@@ -70,7 +104,27 @@ const Products = () => {
     if (urlSiralama) p.siralama = urlSiralama;
     if (urlMinFiyat) p.min_fiyat = urlMinFiyat;
     if (urlMaxFiyat) p.max_fiyat = urlMaxFiyat;
-    return { ...p, ...overrides };
+
+    // Dinamik filtreleri koru
+    const dynamicFilters = getSelectedDynamicFilters();
+    Object.assign(p, dynamicFilters);
+
+    // Eğer kategori değiştiriliyorsa, kategoriye ait eski dinamik filtreleri sıfırla
+    if ('kategori_id' in overrides && overrides.kategori_id !== urlCategoryId) {
+      for (const key of Object.keys(dynamicFilters)) {
+        delete p[key];
+      }
+    }
+
+    // Geçersiz veya undefined değerleri temizleyerek birleştir
+    const finalParams = { ...p, ...overrides };
+    Object.keys(finalParams).forEach(key => {
+      if (finalParams[key] === undefined || finalParams[key] === '') {
+        delete finalParams[key];
+      }
+    });
+
+    return finalParams;
   };
 
   const handleSearch = (e) => {
@@ -194,6 +248,40 @@ const Products = () => {
               Fiyat Filtrele
             </button>
           </div>
+
+          {/* Dinamik Filtreler */}
+          {Object.entries(dynamicFiltersOptions).map(([filterName, options]) => (
+            <div key={filterName} className="mt-6 pt-4 border-t border-surface-100">
+              <label className="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">
+                {filterName}
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                {options.map((option) => {
+                  const isSelected = searchParams.get(filterName) === String(option);
+                  return (
+                    <label key={option} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          const newParams = buildParams();
+                          if (isSelected) {
+                            delete newParams[filterName]; // Seçimi kaldır
+                          } else {
+                            newParams[filterName] = option; // Seç
+                          }
+                          setSearchParams(newParams);
+                        }}
+                        className="w-4 h-4 text-primary-600 focus:ring-primary-500 rounded-sm border-surface-300"
+                      />
+                      <span className="text-sm text-surface-600 group-hover:text-surface-900">{option}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
         </div>
       </aside>
 
@@ -232,9 +320,20 @@ const Products = () => {
             {activeCategory && (
               <span className="inline-flex items-center gap-1 bg-primary-50 text-primary-700 text-xs font-medium px-2.5 py-1 rounded-full">
                 {activeCategory.isim}
-                <button onClick={() => setSearchParams(urlQuery ? {q: urlQuery} : {})} className="ml-0.5 hover:text-primary-900">✕</button>
+                <button onClick={() => setSearchParams(buildParams({ kategori_id: undefined }))} className="ml-0.5 hover:text-primary-900">✕</button>
               </span>
             )}
+            {/* Dinamik Filtre Etiketleri */}
+            {Object.entries(getSelectedDynamicFilters()).map(([key, value]) => (
+              <span key={key} className="inline-flex items-center gap-1 bg-surface-100 text-surface-700 text-xs font-medium px-2.5 py-1 rounded-full border border-surface-200">
+                {key}: {value}
+                <button onClick={() => {
+                  const p = buildParams();
+                  delete p[key];
+                  setSearchParams(p);
+                }} className="ml-0.5 hover:text-surface-900">✕</button>
+              </span>
+            ))}
             <button onClick={clearFilters} className="text-xs text-red-500 hover:text-red-700 font-medium ml-1">
               Tümünü Temizle
             </button>

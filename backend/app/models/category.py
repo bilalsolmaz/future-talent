@@ -33,7 +33,7 @@ class Kategori(Base):
     )
 
     # İlişki: Bir kategorinin birden çok ürünü olabilir (one-to-many)
-    urunler = relationship("Urun", back_populates="kategori")
+    urunler: Mapped[list["Urun"]] = relationship("Urun", back_populates="kategori")
 
     def __repr__(self) -> str:
         return f"<Kategori(id={self.id}, isim={self.isim}, slug={self.slug})>"

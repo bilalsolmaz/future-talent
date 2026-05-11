@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, Minus, Plus, ArrowLeft, Loader2, PackageOpen, 
@@ -54,13 +54,6 @@ const ProductDetail = () => {
   const cartItem = cart.find(item => item.id === parseInt(id));
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
-  useEffect(() => {
-    fetchProduct();
-    fetchReviews();
-    checkFavorite();
-    window.scrollTo(0, 0);
-  }, [id]);
-
   const fetchProduct = async () => {
     setIsLoading(true);
     setError('');
@@ -101,6 +94,13 @@ const ProductDetail = () => {
       setIsFavorite(res.data.favoride);
     } catch { /* silent */ }
   };
+
+  useEffect(() => {
+    fetchProduct();
+    fetchReviews();
+    checkFavorite();
+    window.scrollTo(0, 0);
+  }, [id, user]);
 
   const handleToggleFavorite = async () => {
     if (!user) { navigate('/auth/login'); return; }
