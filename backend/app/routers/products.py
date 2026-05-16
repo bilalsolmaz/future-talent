@@ -12,7 +12,7 @@ from app.models.product import Urun
 from app.models.category import Kategori
 from app.schemas.product import UrunCreate, UrunUpdate, UrunResponse
 
-router = APIRouter(prefix="/api/urunler", tags=["Ürünler"])
+router = APIRouter(prefix="/urunler", tags=["Ürünler"])
 
 @router.get("/filtreler")
 def get_urun_filtreleri(

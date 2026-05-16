@@ -36,7 +36,7 @@ from app.models.user import User
 from app.schemas.auth import RefreshRequest, TokenResponse
 from app.schemas.user import UserCreate, UserResponse
 
-router = APIRouter(prefix="/api/auth", tags=["Kimlik Dogrulama"])
+router = APIRouter(prefix="/auth", tags=["Kimlik Dogrulama"])
 
 
 # ============================================================

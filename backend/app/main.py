@@ -14,13 +14,26 @@ Neden FastAPI seçtik?
   Pydantic ile tip güvenliği. Hata mesajları bile otomatik JSON.
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.core.redis import init_redis, close_redis
 from app.routers import auth, categories, products, orders, ai, returns, reviews, favorites, coupons
 
 settings = get_settings()
+
+# ============================================================
+# FASTAPI LIFESPAN
+# ============================================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Uygulama başlarken:
+    await init_redis()
+    yield
+    # Uygulama kapanırken:
+    await close_redis()
 
 # ============================================================
 # FASTAPI UYGULAMA OLUŞTURMA
@@ -32,6 +45,7 @@ app = FastAPI(
     docs_url="/api/docs",             # Swagger UI adresi
     redoc_url="/api/redoc",           # ReDoc (alternatif dokümantasyon) adresi
     openapi_url="/api/openapi.json",  # OpenAPI şema dosyası
+    lifespan=lifespan,
 )
 
 # ============================================================
@@ -54,36 +68,75 @@ app.add_middleware(
 )
 
 
-# ============================================================
-# ROUTER KAYITLARI
-# ============================================================
-# Her yeni router modulu buraya eklenir.
-# include_router() ile router'daki tum endpoint'ler uygulamaya dahil olur.
-app.include_router(auth.router)
-app.include_router(categories.router)
-app.include_router(products.router)
-app.include_router(orders.router)
-app.include_router(ai.router)
-app.include_router(returns.router)
-app.include_router(reviews.router)
-app.include_router(favorites.router)
-app.include_router(coupons.router)
+from fastapi import APIRouter
 
+# ============================================================
+# ROUTER KAYITLARI (VERSIONING)
+# ============================================================
+api_router = APIRouter()
+
+# Her yeni router modulu buraya eklenir.
+api_router.include_router(auth.router)
+api_router.include_router(categories.router)
+api_router.include_router(products.router)
+api_router.include_router(orders.router)
+api_router.include_router(ai.router)
+api_router.include_router(returns.router)
+api_router.include_router(reviews.router)
+api_router.include_router(favorites.router)
+api_router.include_router(coupons.router)
+
+# Yeni standart: /api/v1
+app.include_router(api_router, prefix="/api/v1")
+
+# Geriye dönük uyumluluk (Frontend güncellenene kadar geçici olarak tutulacak)
+app.include_router(api_router, prefix="/api")
+
+
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from fastapi import Depends
+from app.core.database import get_db
 
 # ============================================================
 # HEALTHCHECK ENDPOINT
 # ============================================================
 @app.get("/api/healthcheck", tags=["Sistem"])
-def healthcheck():
+async def healthcheck(db: Session = Depends(get_db)):
     """
     Sunucunun çalışıp çalışmadığını kontrol eder.
     Deploy doğrulaması ve monitoring araçları bu endpoint'i kullanır.
-
-    Döndürdüğü:
-        {"status": "ok", "mesaj": "...", "versiyon": "1.0.0"}
     """
-    return {
+    status_data = {
         "status": "ok",
         "mesaj": "LocalShop API çalışıyor 🚀",
         "versiyon": "1.0.0",
+        "services": {
+            "postgresql": "error",
+            "redis": "error"
+        }
     }
+    
+    # DB kontrolü
+    try:
+        db.execute(text("SELECT 1"))
+        status_data["services"]["postgresql"] = "ok"
+    except Exception as e:
+        status_data["status"] = "error"
+        status_data["mesaj"] = f"DB Hatası: {e}"
+
+    # Redis kontrolü
+    from app.core.redis import get_redis
+    redis_client = await get_redis()
+    if redis_client:
+        try:
+            await redis_client.ping()
+            status_data["services"]["redis"] = "ok"
+        except Exception as e:
+            status_data["status"] = "error"
+            status_data["mesaj"] = f"Redis Hatası: {e}"
+    else:
+        status_data["status"] = "error"
+        status_data["mesaj"] = "Redis bağlantısı kurulamadı"
+        
+    return status_data

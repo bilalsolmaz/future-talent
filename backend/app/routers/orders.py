@@ -14,7 +14,7 @@ from app.models.order import Siparis, SiparisKalemi
 from app.models.coupon import Kupon
 from app.schemas.order import SiparisCreate, SiparisResponse, SiparisDurumUpdate
 
-router = APIRouter(prefix="/api/siparisler", tags=["Siparişler"])
+router = APIRouter(prefix="/siparisler", tags=["Siparişler"])
 
 
 def _enrich_order(order: Siparis, db: Session) -> Siparis:

@@ -10,7 +10,7 @@ from app.core.security import require_admin
 from app.schemas.ai import AIAciklamaRequest, AIAciklamaResponse
 
 settings = get_settings()
-router = APIRouter(prefix="/api/ai", tags=["Yapay Zeka"])
+router = APIRouter(prefix="/ai", tags=["Yapay Zeka"])
 
 # Eğer API anahtarı ayarlanmışsa Gemini'ı yapılandır
 if settings.GEMINI_API_KEY:

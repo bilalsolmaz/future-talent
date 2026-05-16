@@ -11,7 +11,7 @@ from app.models.favorite import Favori
 from app.models.product import Urun
 from app.schemas.favorite import FavoriToggle, FavoriResponse
 
-router = APIRouter(prefix="/api/favoriler", tags=["Favoriler"])
+router = APIRouter(prefix="/favoriler", tags=["Favoriler"])
 
 
 @router.post("/toggle")

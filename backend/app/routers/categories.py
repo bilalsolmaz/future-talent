@@ -11,7 +11,7 @@ from app.core.security import require_admin
 from app.models.category import Kategori
 from app.schemas.category import KategoriCreate, KategoriUpdate, KategoriResponse
 
-router = APIRouter(prefix="/api/kategoriler", tags=["Kategoriler"])
+router = APIRouter(prefix="/kategoriler", tags=["Kategoriler"])
 
 @router.get("/", response_model=list[KategoriResponse])
 def get_kategoriler(db: Session = Depends(get_db)):

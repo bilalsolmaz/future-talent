@@ -14,7 +14,7 @@ from app.models.order import Siparis
 from app.models.returns import Iade
 from app.schemas.returns import IadeCreate, IadeResponse, IadeDurumUpdate
 
-router = APIRouter(prefix="/api/iadeler", tags=["İadeler"])
+router = APIRouter(prefix="/iadeler", tags=["İadeler"])
 
 
 def _enrich_return(iade: Iade) -> Iade:

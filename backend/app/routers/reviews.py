@@ -12,7 +12,7 @@ from app.models.review import Yorum
 from app.models.order import Siparis, SiparisKalemi
 from app.schemas.review import YorumCreate, YorumResponse
 
-router = APIRouter(prefix="/api/yorumlar", tags=["Yorumlar"])
+router = APIRouter(prefix="/yorumlar", tags=["Yorumlar"])
 
 
 def _enrich(y: Yorum) -> Yorum:

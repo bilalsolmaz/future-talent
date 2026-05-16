@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # Veritabanı
     DATABASE_URL: str
+    REDIS_URL: str
 
     # JWT — JSON Web Token ayarları
     SECRET_KEY: str
@@ -36,9 +37,38 @@ class Settings(BaseSettings):
 
     # Google Gemini AI
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+    GEMINI_TIMEOUT_SECONDS: int = 10
+    GEMINI_MAX_RETRIES: int = 3
+
+    # Kargo Entegrasyonu
+    YURTICI_API_KEY: str = ""
+    YURTICI_API_URL: str = "https://api.yurticikargo.com"
+    PTT_API_KEY: str = ""
+    CARGO_CHECK_INTERVAL_HOURS: int = 2
+
+    # Bildirim (SendGrid)
+    SENDGRID_API_KEY: str = ""
+    FROM_EMAIL: str = "noreply@localshop.com"
+    ADMIN_EMAIL: str = "admin@localshop.com"
+
+    # WhatsApp Webhook
+    WHATSAPP_TOKEN: str = ""
+    WHATSAPP_VERIFY_TOKEN: str = ""
+    WHATSAPP_PHONE_ID: str = ""
+
+    # İş Akışı
+    BRIEFING_CRON_HOUR: int = 8
+    BRIEFING_CRON_MINUTE: int = 0
+
+    # Güvenlik & Uygulama
+    APP_ENV: str = "development"
+    RATE_LIMIT_ENABLED: bool = True
+    SWAGGER_ENABLED: bool = True
+    LOG_LEVEL: str = "INFO"
 
     # CORS — hangi frontend adreslerinden istek kabul edilecek
-    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:8080"]
 
     model_config = {
         "env_file": ".env",

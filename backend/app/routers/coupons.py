@@ -13,7 +13,7 @@ from app.models.user import User
 from app.models.coupon import Kupon
 from app.schemas.coupon import KuponCreate, KuponResponse, KuponApply, KuponApplyResponse
 
-router = APIRouter(prefix="/api/kuponlar", tags=["Kuponlar"])
+router = APIRouter(prefix="/kuponlar", tags=["Kuponlar"])
 
 
 @router.post("/", response_model=KuponResponse, status_code=201)
