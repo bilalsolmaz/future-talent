@@ -49,6 +49,7 @@ class SiparisCreate(BaseModel):
 class SiparisDurumUpdate(BaseModel):
     """Sipariş durumu güncelleme isteği (sadece admin)."""
     durum: str = Field(..., pattern="^(bekliyor|onaylandi|hazirlaniyor|kargolandi|teslim_edildi|iptal)$")
+    kargo_no: str | None = None
 
 class SiparisResponse(BaseModel):
     """Sipariş yanıtı."""
@@ -61,6 +62,7 @@ class SiparisResponse(BaseModel):
     adres: str
     notlar: str | None
     kupon_kodu: str | None
+    kargo_no: str | None
     created_at: datetime
     updated_at: datetime
     kalemler: list[SiparisKalemiResponse]

@@ -7,7 +7,8 @@ import google.generativeai as genai
 
 from app.core.config import get_settings
 from app.core.security import require_admin
-from app.schemas.ai import AIAciklamaRequest, AIAciklamaResponse
+from app.core.database import get_db
+from app.schemas.ai import AIAciklamaRequest, AIAciklamaResponse, ChatRequest, ChatResponse
 
 settings = get_settings()
 router = APIRouter(prefix="/ai", tags=["Yapay Zeka"])
@@ -61,3 +62,22 @@ async def aciklama_olustur(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Yapay zeka ile iletişim kurulamadı: {str(e)}"
         )
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def ai_chat(
+    istek: ChatRequest,
+    db = Depends(get_db)
+):
+    """
+    Kullanıcının LocalShop asistanı (CustomerAgent) ile sohbet etmesini sağlar.
+    """
+    from app.agents.customer import CustomerAgent
+    
+    agent = CustomerAgent(db=db, session_id=istek.session_id)
+    
+    # Kullanıcı ID'sini alma (İleride kimlik doğrulaması yapıldığında eklenecek)
+    # Şimdilik None geçiyoruz
+    yanit = await agent.execute(user_message=istek.mesaj, user_id=None)
+    
+    return {"yanit": yanit}

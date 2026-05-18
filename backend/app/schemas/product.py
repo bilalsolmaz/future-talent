@@ -12,6 +12,7 @@ class UrunBase(BaseModel):
     aciklama: str | None = None
     fiyat: Decimal = Field(..., gt=0)
     stok: int = Field(default=0, ge=0)
+    stok_esigi: int = Field(default=10, ge=0)
     kategori_id: int | None = None
     resim_url: str | None = None
     ozellikler: dict | None = None
@@ -26,6 +27,7 @@ class UrunUpdate(BaseModel):
     aciklama: str | None = None
     fiyat: Decimal | None = Field(None, gt=0)
     stok: int | None = Field(None, ge=0)
+    stok_esigi: int | None = Field(None, ge=0)
     kategori_id: int | None = None
     resim_url: str | None = None
     ozellikler: dict | None = None

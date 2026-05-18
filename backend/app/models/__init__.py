@@ -16,6 +16,11 @@ from app.models.returns import Iade
 from app.models.review import Yorum
 from app.models.favorite import Favori
 from app.models.coupon import Kupon
+from app.models.kargo import KargoTakip
+from app.models.conversation import AgentKonusma
+from app.models.stock_alert import StokUyarisi
+from app.models.briefing import BriefingGecmisi
+from app.models.analytics_summary import AnalitikOzet
 
 # __all__: "from app.models import *" yapıldığında
 # sadece buradaki isimler dışarı aktarılır
@@ -23,4 +28,6 @@ __all__ = [
     "Base", "User", "Kategori", "Urun",
     "Siparis", "SiparisKalemi", "Iade",
     "Yorum", "Favori", "Kupon",
+    "KargoTakip", "AgentKonusma", "StokUyarisi",
+    "BriefingGecmisi", "AnalitikOzet"
 ]

@@ -22,6 +22,7 @@ import OrdersAdmin from './pages/admin/OrdersAdmin';
 import CategoriesAdmin from './pages/admin/CategoriesAdmin';
 import FinanceAdmin from './pages/admin/FinanceAdmin';
 import ReturnsAdmin from './pages/admin/ReturnsAdmin';
+import ChatbotWidget from './components/ChatbotWidget';
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
               </Routes>
             </main>
             <Footer />
+            <ChatbotWidget />
           </div>
         } />
       </Routes>

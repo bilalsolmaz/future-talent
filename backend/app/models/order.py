@@ -50,6 +50,7 @@ class Siparis(Base):
     # "not" Python ve SQL'de reserved word → "notlar" kullanıyoruz
     notlar: Mapped[str | None] = mapped_column(Text, nullable=True)
     kupon_kodu: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    kargo_no: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

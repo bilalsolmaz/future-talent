@@ -13,3 +13,12 @@ class AIAciklamaRequest(BaseModel):
 class AIAciklamaResponse(BaseModel):
     """AI'dan dönen ürün açıklaması."""
     aciklama: str
+
+class ChatRequest(BaseModel):
+    """Müşteri Agent'ına gönderilen mesaj isteği."""
+    mesaj: str = Field(..., min_length=1)
+    session_id: str = Field(..., min_length=5)
+
+class ChatResponse(BaseModel):
+    """Müşteri Agent'ından dönen yanıt."""
+    yanit: str

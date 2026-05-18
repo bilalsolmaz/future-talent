@@ -31,8 +31,13 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Uygulama başlarken:
     await init_redis()
+    
+    from app.core.scheduler import setup_scheduler, shutdown_scheduler
+    setup_scheduler()
+    
     yield
     # Uygulama kapanırken:
+    shutdown_scheduler()
     await close_redis()
 
 # ============================================================
