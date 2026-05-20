@@ -40,8 +40,12 @@ class CargoAgent(BaseAgent):
         self.log_action("CHECKING_CARGOS", "Kargo durum kontrolleri başladı.")
         
         # Henüz teslim edilmemiş ama kargolanmış siparişleri bul
+        # joinedload: user ilişkisini tek sorguda çek (N+1 sorgu sorununu önler ve lazy-load hatasını engeller)
+        from sqlalchemy.orm import joinedload
         aktif_kargolar = self.db.execute(
-            select(Siparis).where(Siparis.durum == "kargolandi")
+            select(Siparis)
+            .options(joinedload(Siparis.user))
+            .where(Siparis.durum == "kargolandi")
         ).scalars().all()
         
         for siparis in aktif_kargolar:

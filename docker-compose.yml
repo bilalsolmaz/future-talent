@@ -44,7 +44,9 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       # Containerlar arası iletişim olduğu için CORS'ta sitenin asıl adresi olmalı.
       # Şimdilik her şeye açık (development/test için), canlıya alınca düzeltilir
-      CORS_ORIGINS: '["*"]'
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'
+    ports:
+      - "8000:8000"
     networks:
       - localshop_network
 
@@ -65,7 +67,7 @@ services:
     container_name: localshop_proxy
     restart: always
     ports:
-      - "8080:80"
+      - "8090:80"
       # İleride SSL (HTTPS) için 443 portu açılacak
       # - "443:443" 
     volumes:

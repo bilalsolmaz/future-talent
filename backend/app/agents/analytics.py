@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 
@@ -32,7 +32,8 @@ class AnalyticsAgent(BaseAgent):
         """
         self.log_action("CALCULATING_METRICS", f"{periyot} analitik raporu hazırlanıyor.")
         
-        simdi = datetime.now()
+        # timezone-aware datetime kullanıyoruz — DB'deki DateTime(timezone=True) alanlarıyla uyumlu
+        simdi = datetime.now(timezone.utc)
         if periyot == "gunluk":
             baslangic = simdi - timedelta(days=1)
         elif periyot == "haftalik":
@@ -40,7 +41,6 @@ class AnalyticsAgent(BaseAgent):
         elif periyot == "aylik":
             baslangic = simdi - timedelta(days=30)
         else:
-            # Varsayılan günlük
             baslangic = simdi - timedelta(days=1)
             
         # 1. Toplam Ciro ve Sipariş Sayısı

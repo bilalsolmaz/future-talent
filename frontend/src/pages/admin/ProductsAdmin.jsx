@@ -10,6 +10,8 @@ const ProductsAdmin = () => {
   // Modal durumları
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   
   // AI durumları
   const [isAILoading, setIsAILoading] = useState(false);
@@ -118,14 +120,20 @@ const ProductsAdmin = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bu ürünü silmek (pasife almak) istediğinize emin misiniz?')) {
-      try {
-        await api.delete(`/urunler/${id}`);
-        fetchData();
-      } catch (error) {
-        alert('Silme hatası');
-      }
+  const confirmDelete = (product) => {
+    setProductToDelete(product);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!productToDelete) return;
+    try {
+      await api.delete(`/urunler/${productToDelete.id}`);
+      fetchData();
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
+    } catch (error) {
+      alert('Silme hatası: ' + (error.response?.data?.detail || error.message));
     }
   };
 
@@ -170,7 +178,7 @@ const ProductsAdmin = () => {
                     <button onClick={() => openModal(product)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Düzenle">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDelete(product.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Sil (Pasife Al)">
+                    <button onClick={() => confirmDelete(product)} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Sil (Pasife Al)">
                       <Trash2 size={16} />
                     </button>
                   </td>
@@ -250,6 +258,25 @@ const ProductsAdmin = () => {
                 <button type="submit" className="btn btn-primary">Kaydet</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Silme Onay Modalı */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-surface-900/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Ürünü Sil?</h2>
+            <p className="text-surface-500 mb-6">
+              <strong className="text-surface-900">{productToDelete?.isim}</strong> adlı ürünü silmek (pasife almak) istediğinize emin misiniz?
+            </p>
+            <div className="flex justify-center gap-3">
+              <button onClick={() => setIsDeleteModalOpen(false)} className="btn btn-secondary flex-1">İptal</button>
+              <button onClick={handleDelete} className="btn bg-red-600 hover:bg-red-700 text-white flex-1">Evet, Sil</button>
+            </div>
           </div>
         </div>
       )}

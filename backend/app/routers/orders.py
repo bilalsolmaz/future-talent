@@ -5,6 +5,7 @@ Sipariş API Endpoint'leri
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List
+from decimal import Decimal
 
 from app.core.database import get_db
 from app.core.security import get_current_user, require_admin
@@ -168,6 +169,9 @@ def update_siparis_durumu(
             urun.stok -= kalem.adet
             
     siparis.durum = durum_in.durum
+    # Kargo numarasını da güncelle (eğer gönderildiyse)
+    if durum_in.kargo_no is not None:
+        siparis.kargo_no = durum_in.kargo_no
     db.commit()
     db.refresh(siparis)
     return _enrich_order(siparis, db)

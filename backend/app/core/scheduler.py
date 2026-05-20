@@ -81,19 +81,19 @@ def setup_scheduler():
         replace_existing=True,
     )
     
-    # 3. Workflow Agent - Her gün sabah 08:00
+    # 3. Workflow Agent - Her gün sabah 08:00 (Türkiye saati)
     scheduler.add_job(
         run_workflow_agent,
-        trigger=CronTrigger(hour=8, minute=0),
+        trigger=CronTrigger(hour=8, minute=0, timezone="Europe/Istanbul"),
         id="workflow_briefing_job",
         name="Günlük Yönetici Brifingi",
         replace_existing=True,
     )
     
-    # 4. Analytics Agent - Her gün gece 23:50'de
+    # 4. Analytics Agent - Her gün gece 23:50'de (Türkiye saati)
     scheduler.add_job(
         run_analytics_agent,
-        trigger=CronTrigger(hour=23, minute=50),
+        trigger=CronTrigger(hour=23, minute=50, timezone="Europe/Istanbul"),
         id="analytics_daily_job",
         name="Günlük Analitik Özet Çıkarımı",
         replace_existing=True,

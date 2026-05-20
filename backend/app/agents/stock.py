@@ -32,12 +32,12 @@ class StockAgent(BaseAgent):
         """
         self.log_action("CHECKING_STOCKS", "Stok kontrolü başlatıldı.")
         
-        # Sadece aktif olan ve daha önce 'acik' uyarısı bulunmayan, stoğu eşiğin altına inmiş ürünleri çek.
-        # Neden? Aynı ürün için tekrar tekrar uyarı oluşturmamak için.
+        # stok < stok_esigi: Eşiğin ALTINA düşenleri bul (eşikte olanlar değil).
+        # Neden < değil <=? stok_esigi=0 olan ürünlerde stok=0 her zaman match ederdi → spam uyarı.
         kritik_urunler = self.db.execute(
             select(Urun).where(
                 Urun.aktif == True,
-                Urun.stok <= Urun.stok_esigi
+                Urun.stok < Urun.stok_esigi
             )
         ).scalars().all()
         

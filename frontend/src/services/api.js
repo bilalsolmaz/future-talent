@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Backend URL'sini çevresel değişkenden al veya varsayılanı kullan
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+// Geliştirme ortamı için bağıl yol kullanıyoruz, böylece istek vite proxy üzerinden geçer
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 // Merkezi Axios instance oluşturuluyor
 const api = axios.create({

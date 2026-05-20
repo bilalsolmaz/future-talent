@@ -96,6 +96,9 @@ class CustomerAgent(BaseAgent):
             response_text = "Bir hata oluştu, lütfen tekrar deneyin."
             
         # 5. Konuşma geçmişini güncelle
+        # ÖNEMLİ: DB'ye yalnızca gerçek kullanıcı mesajını kaydediyoruz.
+        # Zenginleştirilmiş (katalog bilgisi dahil) prompt kaydedilmez — token israfını ve
+        # gizli veri sızıntısını önler. Bir sonraki oturumda geçmiş temiz kalır.
         yeni_mesajlar = list(konusma.mesajlar) # SQLAlchemy mutable list tespiti için kopyala
         yeni_mesajlar.append({"role": "user", "content": user_message})
         yeni_mesajlar.append({"role": "model", "content": response_text})
