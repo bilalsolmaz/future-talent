@@ -35,11 +35,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # Google Gemini AI
-    GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash"
-    GEMINI_TIMEOUT_SECONDS: int = 10
-    GEMINI_MAX_RETRIES: int = 3
+    # OpenAI AI
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_TIMEOUT_SECONDS: int = 10
+    OPENAI_MAX_RETRIES: int = 3
 
     # Kargo Entegrasyonu
     YURTICI_API_KEY: str = ""

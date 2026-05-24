@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Sparkles, AlertCircle, Upload, X } from 'lucide-react';
 import api from '../../services/api';
 
 const ProductsAdmin = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Modal durumları
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,7 +24,8 @@ const ProductsAdmin = () => {
     fiyat: '',
     stok: '',
     kategori_id: '',
-    aktif: true
+    aktif: true,
+    resim_url: ''
   });
 
   useEffect(() => {
@@ -55,7 +57,8 @@ const ProductsAdmin = () => {
         fiyat: product.fiyat,
         stok: product.stok,
         kategori_id: product.kategori_id,
-        aktif: product.aktif
+        aktif: product.aktif,
+        resim_url: product.resim_url || ''
       });
     } else {
       setEditingProduct(null);
@@ -65,7 +68,8 @@ const ProductsAdmin = () => {
         fiyat: '',
         stok: '',
         kategori_id: categories[0]?.id || '',
-        aktif: true
+        aktif: true,
+        resim_url: ''
       });
     }
     setIsModalOpen(true);
@@ -94,6 +98,39 @@ const ProductsAdmin = () => {
       setAiError(error.response?.data?.detail || 'Gemini API ile iletişim kurulamadı. API Key kontrol edin.');
     } finally {
       setIsAILoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Dosya formatı kontrolü
+    const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.webp|\.gif)$/i;
+    if (!allowedExtensions.exec(file.name)) {
+      alert('Geçersiz dosya formatı. Sadece JPG, JPEG, PNG, WEBP ve GIF dosyalarına izin verilir.');
+      return;
+    }
+
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    setIsUploading(true);
+    try {
+      const response = await api.post('/urunler/upload-gorsel', uploadData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setFormData(prev => ({
+        ...prev,
+        resim_url: response.data.url
+      }));
+    } catch (error) {
+      console.error('Görsel yükleme hatası:', error);
+      alert('Görsel yüklenirken bir hata oluştu: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -167,7 +204,16 @@ const ProductsAdmin = () => {
               {products.map(product => (
                 <tr key={product.id} className="hover:bg-surface-50 transition-colors">
                   <td className="p-4 text-sm text-surface-500">#{product.id}</td>
-                  <td className="p-4 font-medium text-surface-900">{product.isim}</td>
+                  <td className="p-4 font-medium text-surface-900">
+                    <div className="flex items-center gap-3">
+                      {product.resim_url ? (
+                        <img src={product.resim_url} alt={product.isim} className="w-10 h-10 object-cover rounded-lg border border-surface-200" />
+                      ) : (
+                        <div className="w-10 h-10 bg-surface-100 rounded-lg flex items-center justify-center text-surface-400 border border-surface-200 text-[10px] font-semibold text-center leading-3">Görsel Yok</div>
+                      )}
+                      <span>{product.isim}</span>
+                    </div>
+                  </td>
                   <td className="p-4 text-sm text-surface-900">₺{product.fiyat}</td>
                   <td className="p-4 text-sm text-surface-900">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.stok < 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -206,6 +252,75 @@ const ProductsAdmin = () => {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1">Ürün Adı</label>
                   <input type="text" required className="input-field" value={formData.isim} onChange={e => setFormData({...formData, isim: e.target.value})} />
+                </div>
+                
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1">Ürün Görseli</label>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Bilgisayardan Yükleme Alanı */}
+                      <div className="relative border-2 border-dashed border-surface-300 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-surface-50 transition-colors group cursor-pointer min-h-[100px]">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          onChange={handleFileUpload}
+                          disabled={isUploading}
+                        />
+                        {isUploading ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="animate-spin text-primary-500" size={24} />
+                            <span className="text-xs text-surface-500 font-medium">Yükleniyor...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1.5">
+                            <Upload className="text-surface-400 group-hover:text-primary-500 transition-colors" size={24} />
+                            <span className="text-xs text-surface-600 font-semibold">Bilgisayardan Görsel Seç</span>
+                            <span className="text-[10px] text-surface-400">PNG, JPG, WEBP (Max 5MB)</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* URL ile Giriş Alanı */}
+                      <div className="flex flex-col justify-center">
+                        <span className="text-xs text-surface-400 mb-1 text-center font-medium sm:hidden">— VEYA —</span>
+                        <label className="text-xs text-surface-500 mb-1 hidden sm:block">Görsel İnternet Adresi (URL)</label>
+                        <input 
+                          type="url" 
+                          placeholder="https://example.com/resim.jpg" 
+                          className="input-field" 
+                          value={formData.resim_url} 
+                          onChange={e => setFormData({...formData, resim_url: e.target.value})} 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Önizleme ve Kaldırma Kartı */}
+                    {formData.resim_url && (
+                      <div className="flex items-center gap-4 bg-surface-50 p-3 rounded-xl border border-surface-200 shadow-sm relative group/preview">
+                        <div className="w-16 h-16 rounded-lg border border-surface-200 overflow-hidden flex-shrink-0 bg-white shadow-inner">
+                          <img 
+                            src={formData.resim_url} 
+                            alt="Önizleme" 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => { e.target.src = 'https://placehold.co/150x150?text=G%C3%B6rsel+Bulunamad%C4%B1'; }} 
+                          />
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <p className="text-xs font-semibold text-surface-700 truncate">Seçilen Görsel</p>
+                          <p className="text-[10px] text-surface-400 truncate font-mono">{formData.resim_url}</p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData({...formData, resim_url: ''})}
+                          className="p-1.5 bg-white text-red-500 border border-surface-200 hover:bg-red-50 hover:text-red-600 rounded-lg shadow-sm transition-all"
+                          title="Görseli Kaldır"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div>

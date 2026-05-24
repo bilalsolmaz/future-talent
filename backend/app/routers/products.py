@@ -2,7 +2,10 @@
 Ürün API Endpoint'leri
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, UploadFile, File
+import os
+import uuid
+import shutil
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -165,3 +168,45 @@ def delete_urun(
     urun.aktif = False
     db.commit()
     return None
+
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+
+@router.post("/upload-gorsel")
+async def upload_gorsel(
+    file: UploadFile = File(...),
+    admin = Depends(require_admin)
+):
+    """
+    Ürün görseli yükle (Sadece Admin).
+    Seçilen yerel görseli static/uploads klasörüne kaydeder ve erişilebilir URL'sini döner.
+    """
+    # Uzantıyı al ve küçük harfe çevir
+    filename = file.filename
+    _, ext = os.path.splitext(filename)
+    ext = ext.lower()
+    
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Geçersiz dosya formatı. Sadece JPG, JPEG, PNG, WEBP ve GIF dosyalarına izin verilir."
+        )
+        
+    # Benzersiz dosya adı üret
+    yeni_dosya_adi = f"{uuid.uuid4()}{ext}"
+    hedef_klasor = "static/uploads"
+    os.makedirs(hedef_klasor, exist_ok=True)
+    hedef_yol = os.path.join(hedef_klasor, yeni_dosya_adi)
+    
+    # Dosyayı diske yaz
+    try:
+        with open(hedef_yol, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Dosya kaydedilirken bir hata oluştu: {str(e)}"
+        )
+    finally:
+        await file.close()
+        
+    return {"url": f"/api/static/uploads/{yeni_dosya_adi}"}

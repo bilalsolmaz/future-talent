@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy.orm import Session
-from app.services.gemini import GeminiService
+from app.services.openai_service import OpenAIService
 
 logger = logging.getLogger(__name__)
 
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class BaseAgent:
     """
     Sistemdeki tüm AI Agent'ların türediği temel sınıf.
-    Veritabanı bağlantısı, Gemini LLM erişimi ve loglama standartlarını sağlar.
+    Veritabanı bağlantısı, OpenAI LLM erişimi ve loglama standartlarını sağlar.
     """
 
     # Bu alan alt sınıflarda ezilmeli (override)
@@ -23,8 +23,8 @@ class BaseAgent:
         self.db = db
         self.session_id = session_id
         
-        # Her agent'ın kendine has sistem promptu ile Gemini'yi başlat
-        self.llm = GeminiService(system_instruction=self.SYSTEM_INSTRUCTION)
+        # Her agent'ın kendine has sistem promptu ile OpenAI'yı başlat
+        self.llm = OpenAIService(system_instruction=self.SYSTEM_INSTRUCTION)
         self.logger = logging.getLogger(f"agent.{self.AGENT_NAME.lower()}")
 
     async def execute(self, task_input: str, **kwargs):

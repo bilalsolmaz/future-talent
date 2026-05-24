@@ -35,13 +35,16 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - ./backend/static:/app/static
     environment:
       # Veritabanı URL'si container ismine (db) göre ayarlandı
       DATABASE_URL: postgresql://${POSTGRES_USER:-localshop_user}:${POSTGRES_PASSWORD:-localshop123}@db:5432/${POSTGRES_DB:-localshop}
       # Redis — container ismi "redis", şifre .env'den
       REDIS_URL: redis://:${REDIS_PASSWORD:-localshop_redis_123}@redis:6379/0
       SECRET_KEY: ${SECRET_KEY:-super-secret-key-for-production-needs-to-be-strong}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       # Containerlar arası iletişim olduğu için CORS'ta sitenin asıl adresi olmalı.
       # Şimdilik her şeye açık (development/test için), canlıya alınca düzeltilir
       CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'

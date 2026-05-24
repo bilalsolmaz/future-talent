@@ -97,7 +97,7 @@ US-13  Admin olarak son 30 günlük satış trendini ve gelecek hafta
 | F-06 | Kategori CRUD | Zorunlu |
 | F-07 | Listeleme: filtre (kategori) + arama (ILIKE) + sayfalama | Zorunlu |
 | F-08 | Her ürüne `stok_esigi` alanı | Zorunlu |
-| F-09 | Gemini AI ürün açıklama üreteci | Zorunlu |
+| F-09 | OpenAI AI ürün açıklama üreteci | Zorunlu |
 
 ### 4.3 Sipariş Akışı
 
@@ -138,7 +138,7 @@ US-13  Admin olarak son 30 günlük satış trendini ve gelecek hafta
 | F-27 | Sipariş oluşturulunca stok eşik kontrolü (synchronous) | Zorunlu |
 | F-28 | Stok < eşik → `stok_uyarilari` tablosuna kayıt | Zorunlu |
 | F-29 | Stok < eşik → admin'e e-posta + dashboard uyarısı | Zorunlu |
-| F-30 | Gemini: geçmiş satış verisine göre yenileme miktarı önerisi | Zorunlu |
+| F-30 | OpenAI: geçmiş satış verisine göre yenileme miktarı önerisi | Zorunlu |
 | F-31 | `GET /api/stock/alerts` — açık uyarılar listesi [admin] | Zorunlu |
 | F-32 | Uyarı kapatma / onaylama mekanizması | Yüksek |
 
@@ -158,7 +158,7 @@ US-13  Admin olarak son 30 günlük satış trendini ve gelecek hafta
 | ID | Gereksinim | Öncelik |
 |---|---|---|
 | F-39 | Son 30 günlük satış trend analizi | Orta |
-| F-40 | En çok satan 5 ürün tahmini (Gemini + geçmiş veri) | Orta |
+| F-40 | En çok satan 5 ürün tahmini (OpenAI + geçmiş veri) | Orta |
 | F-41 | `GET /api/analytics/insights` — haftalık özet | Orta |
 | F-42 | Admin dashboard analitik sekmesi | Orta |
 
@@ -206,8 +206,8 @@ Browser / WhatsApp
                                │
               ┌────────────────┼─────────────────┐
               │                │                 │
-         Agent Layer      PostgreSQL           Redis
-         (Gemini Core)    (localhost:5432)  (localhost:6379)
+          Agent Layer      PostgreSQL           Redis
+        (OpenAI Core)    (localhost:5432)  (localhost:6379)
               │
     ┌─────────┼─────────┬──────────┐
     │         │         │          │
@@ -216,7 +216,7 @@ Customer  Cargo    Stock     Workflow
     │         │         │          │
     └────┬────┘    ┌────┘    ┌─────┘
          │         │         │
-    Gemini API  Kargo API  APScheduler
+    OpenAI API  Kargo API  APScheduler
                           SendGrid
 ```
 
@@ -433,7 +433,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # AI
-GEMINI_API_KEY=gemini-api-anahtariniz
+OPENAI_API_KEY=openai-api-anahtariniz
+OPENAI_MODEL=gpt-4o-mini
 
 # Kargo
 YURTICI_API_KEY=yurtici-api-anahtari
@@ -463,8 +464,8 @@ CARGO_CHECK_INTERVAL_HOURS=2
 | Değerlendirme Kriteri | LocalShop Karşılığı |
 |---|---|
 | AI ajanları tasarımı | 5 agent (Customer, Cargo, Stock, Workflow, Analytics) |
-| Doğal dil işleme | CustomerAgent — Gemini ile niyet sınıflandırma |
-| Veri ile etkileşim (RAG) | Agent'lar DB + geçmiş veriyi bağlam olarak Gemini'ye iletir |
+| Doğal dil işleme | CustomerAgent — OpenAI ile niyet sınıflandırma |
+| Veri ile etkileşim (RAG) | Agent'lar DB + geçmiş veriyi bağlam olarak OpenAI'ye iletir |
 | Harici sistem entegrasyonu | Kargo API + SendGrid + WhatsApp API |
 | Aksiyon alabilen sistemler | Otomatik bildirim, yenileme önerisi, briefing gönderimi |
 | İnsan müdahalesini azaltma | Kargo + stok + briefing tamamen otomatik |

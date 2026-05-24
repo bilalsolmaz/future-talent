@@ -2,14 +2,14 @@
 name: LocalShop plan
 overview: >
   Küçük ve yerel işletmeler için AI-agent destekli dijital vitrin & operasyon otomasyon platformu.
-  React + FastAPI + PostgreSQL + Gemini API tabanlı full-stack uygulama.
+  React + FastAPI + PostgreSQL + OpenAI API tabanlı full-stack uygulama.
   Hackathon kapsamında CustomerAgent (WhatsApp/chat), CargoAgent (kargo takip),
   StockAgent (stok uyarı), WorkflowAgent (sabah briefing) ve AnalyticsAgent ekleniyor.
   Hostinger VPS (Ubuntu 24.04) üzerinde Nginx + Systemd + APScheduler + Redis ile
   production deploy hedeflenmektedir.
 todos:
   - id: confirm-stack
-    content: React + FastAPI + PostgreSQL + Redis + Gemini API mimarisini onayla
+    content: React + FastAPI + PostgreSQL + Redis + OpenAI API mimarisini onayla
     status: completed
   - id: write-docs
     content: MVP v2, PRD v2 ve PLAN v2 belgelerini oluştur; hackathon kapsamı entegre edildi
@@ -32,11 +32,11 @@ todos:
     content: >
       Temel e-ticaret API: kategori CRUD, ürün CRUD (filtre+arama+sayfalama+stok_esigi),
       sipariş oluşturma (stok kontrolü + kargo_no alanı), sipariş yönetimi,
-      Gemini AI açıklama endpoint'i
+      OpenAI AI açıklama endpoint'i
     status: pending
   - id: build-customer-agent
     content: >
-      CustomerAgent: POST /api/agent/chat, Gemini niyet sınıflandırma
+      CustomerAgent: POST /api/agent/chat, OpenAI niyet sınıflandırma
       (sipariş_sorgu / stok_sorgu / genel), konuşma hafızası (Redis),
       agent_konusmalar tablosu, yanıt süresi ≤3sn
     status: pending
@@ -49,7 +49,7 @@ todos:
   - id: build-stock-agent
     content: >
       StockAgent: sipariş oluşturulunca eşik kontrolü, stok_uyarilari tablosu,
-      admin e-posta + dashboard uyarısı, Gemini yenileme miktarı önerisi,
+      admin e-posta + dashboard uyarısı, OpenAI yenileme miktarı önerisi,
       GET /api/stock/alerts endpoint'i
     status: pending
   - id: build-workflow-agent
@@ -61,7 +61,7 @@ todos:
   - id: build-analytics-agent
     content: >
       AnalyticsAgent (opsiyonel): 30 günlük satış trend analizi,
-      Gemini ile stok tahmini, GET /api/analytics/insights endpoint'i,
+      OpenAI ile stok tahmini, GET /api/analytics/insights endpoint'i,
       analitik_ozet tablosu
     status: pending
   - id: build-whatsapp-webhook
@@ -128,7 +128,7 @@ KOBİ operasyon otomasyonu hackathonuna katılım kapsamında proje genişletild
 ## Varsayımlar
 
 - İlk sürüm tek işletme (tek-tenant); çok-tenant v2'ye bırakıldı.
-- Gemini API gemini-2.0-flash modeli — ücretsiz tier yeterli.
+- Başlangıçta Gemini API gemini-2.0-flash modeli planlanmıştı; ardından **OpenAI gpt-4o-mini** modeline geçildi.
 - Kargo entegrasyonu Yurtiçi Kargo öncelikli; PTT/Aras eklenti.
 - WhatsApp webhook MVP'de altyapısı kurulur, tam entegrasyon v1.1.
 - E-posta bildirimleri SendGrid üzerinden.
@@ -145,7 +145,7 @@ KOBİ operasyon otomasyonu hackathonuna katılım kapsamında proje genişletild
 ## Agent Mimarisi
 
 ```
-Gemini Agent Core (Orchestrator)
+Gemini / OpenAI Agent Core (Orchestrator)
 │
 ├── CustomerAgent
 │   ├── Niyet: sipariş_sorgu → siparisler tablosu + kargo_takip
@@ -161,7 +161,7 @@ Gemini Agent Core (Orchestrator)
 │   ├── Tetikleyici: sipariş oluşturma (synchronous)
 │   ├── stok < stok_esigi → stok_uyarilari kayıt
 │   ├── → Admin e-posta + dashboard
-│   └── Gemini: geçmiş satış → yenileme önerisi
+│   └── OpenAI: geçmiş satış → yenileme önerisi
 │
 ├── WorkflowAgent
 │   ├── APScheduler her gün 08:00
@@ -171,7 +171,7 @@ Gemini Agent Core (Orchestrator)
 │
 └── AnalyticsAgent (opsiyonel)
     ├── Son 30 gün satış verisi analizi
-    ├── Gemini: önümüzdeki hafta tahmin
+    ├── OpenAI: önümüzdeki hafta tahmin
     └── → analitik_ozet kayıt
 ```
 
@@ -185,7 +185,7 @@ Gemini Agent Core (Orchestrator)
 | Önbellek/Kuyruk | Redis | Agent session cache, bildirim kuyruğu |
 | ORM | SQLAlchemy 2.x + Alembic | Güvenli ORM + migration |
 | Auth | JWT + bcrypt | Stateless, rol bazlı |
-| AI Orchestrator | Google Gemini API (flash 2.0) | Tüm agent beyni |
+| AI Orchestrator | OpenAI API (gpt-4o-mini) | Tüm agent beyni |
 | Zamanlayıcı | APScheduler | Cron görevleri |
 | Kargo | Yurtiçi API + PTT | Kargo takibi |
 | E-posta | SendGrid | Otomatik bildirimler |
@@ -231,10 +231,10 @@ analitik_ozet       tip, baslangic/bitis, veriler (JSONB)
 - Kategori + Ürün CRUD (stok_esigi alanıyla)
 - Sipariş oluşturma (kargo_no alanıyla)
 - Sipariş yönetimi ve durum akışı
-- Gemini AI açıklama endpoint'i
+- OpenAI AI açıklama endpoint'i
 
 ### Faz 5 — Agent Katmanı
-- Gemini orchestrator core
+- OpenAI orchestrator core
 - CustomerAgent (niyet sınıflandırma + sorgu)
 - StockAgent (eşik kontrolü + yenileme önerisi)
 - CargoAgent (Yurtiçi API + gecikme tespiti)

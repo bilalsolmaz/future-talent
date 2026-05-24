@@ -28,7 +28,7 @@ MVP, bu iki katmanın birlikte çalışan, test edilebilir ve deploy edilebilir 
 ### 2. Ürün Vitrini & Yönetimi
 - [ ] Admin: ürün ekle / düzenle / sil (soft delete) / stok güncelle
 - [ ] Müşteri: listeleme, kategori filtresi, arama, detay sayfası
-- [ ] **Gemini AI — Ürün Açıklama Üreteci** (özgün özellik)
+- [ ] **OpenAI AI — Ürün Açıklama Üreteci** (özgün özellik)
 
 ### 3. Sepet & Sipariş Akışı
 - [ ] Sepete ekle / çıkar / miktar güncelle
@@ -57,7 +57,7 @@ MVP, bu iki katmanın birlikte çalışan, test edilebilir ve deploy edilebilir 
 ### 6. Stok & Envanter Ajanı — StockAgent
 - [ ] Stok eşik sistemi: her ürün için `stok_esigi` alanı
 - [ ] Stok eşiğin altına düşünce admin'e otomatik uyarı (e-posta + dashboard)
-- [ ] Geçmiş satış verisine dayalı yenileme miktarı önerisi (Gemini)
+- [ ] Geçmiş satış verisine dayalı yenileme miktarı önerisi (OpenAI)
 - [ ] Kritik stok dashboard widget'ı
 
 ### 7. İş Akışı Ajanı — WorkflowAgent
@@ -71,7 +71,7 @@ MVP, bu iki katmanın birlikte çalışan, test edilebilir ve deploy edilebilir 
 
 ### 8. Analitik & İçgörü Ajanı — AnalyticsAgent *(Opsiyonel)*
 - [ ] Son 30 günlük satış trend analizi
-- [ ] En çok satan 5 ürün tahmini (Gemini + geçmiş veri)
+- [ ] En çok satan 5 ürün tahmini (OpenAI + geçmiş veri)
 - [ ] Admin dashboard analitik sekmesi
 - [ ] Haftalık özet rapor (e-posta)
 
@@ -123,7 +123,7 @@ analitik_ozet       → id, tarih, veriler (JSONB), tip (gunluk/haftalik/aylik)
 | Önbellek/Kuyruk | Redis | Agent mesaj kuyruğu, session cache |
 | ORM | SQLAlchemy 2.x + Alembic | Veri erişimi |
 | Auth | JWT + bcrypt | Kimlik doğrulama |
-| AI Orchestrator | Google Gemini API | Tüm agent'ların beyni |
+| AI Orchestrator | OpenAI API (gpt-4o-mini) | Tüm agent'ların beyni |
 | Zamanlayıcı | APScheduler | Cron görevleri (briefing, kargo kontrol) |
 | Kargo | Yurtiçi API + PTT API | Kargo takibi |
 | Bildirim | SendGrid (e-posta) | Otomatik bildirimler |
@@ -136,7 +136,7 @@ analitik_ozet       → id, tarih, veriler (JSONB), tip (gunluk/haftalik/aylik)
 ## 🤖 Agent Mimarisi
 
 ```
-Gemini Agent Core (Orchestrator)
+OpenAI Agent Core (Orchestrator)
 ├── CustomerAgent     → Doğal dil sorgu · sipariş/stok yanıtlama
 ├── CargoAgent        → Kargo takip · gecikme tespiti · bildirim
 ├── StockAgent        → Stok izleme · eşik uyarısı · yenileme önerisi
@@ -144,7 +144,7 @@ Gemini Agent Core (Orchestrator)
 └── AnalyticsAgent    → Satış trendi · tahmin · özet rapor
 ```
 
-Her agent: Gemini API + ilgili veritabanı + harici API erişimine sahip.
+Her agent: OpenAI API + ilgili veritabanı + harici API erişimine sahip.
 Orchestrator: hangi agent'ın devreye gireceğini kullanıcı niyetine göre belirler.
 
 ---

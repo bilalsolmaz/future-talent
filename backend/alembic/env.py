@@ -5,11 +5,6 @@ Bu dosya Alembic'e şunları söyler:
 1. Veritabanı URL'ini .env'den oku (alembic.ini'den değil)
 2. Model metadata'sını kullan (autogenerate için)
 3. Online/offline migration'ı çalıştır
-
-Neden env.py'yi değiştirdik?
-  Varsayılan env.py, DB URL'ini alembic.ini'den okur.
-  Biz .env dosyasından okumak istiyoruz (tek kaynak prensibi).
-  Ayrıca autogenerate için model metadata'sını bağlamamız gerekiyor.
 """
 
 from logging.config import fileConfig

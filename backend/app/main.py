@@ -54,6 +54,16 @@ app = FastAPI(
 )
 
 # ============================================================
+# STATİK DOSYALAR (UPLOAD) BÖLÜMÜ
+# ============================================================
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Uygulama için yükleme klasörlerini oluşturup mount ediyoruz
+os.makedirs("static/uploads", exist_ok=True)
+app.mount("/api/static", StaticFiles(directory="static"), name="static")
+
+# ============================================================
 # CORS MIDDLEWARE
 # ============================================================
 # CORS (Cross-Origin Resource Sharing):
