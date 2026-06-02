@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.redis import init_redis, close_redis
-from app.routers import auth, categories, products, orders, ai, returns, reviews, favorites, coupons
+from app.routers import auth, categories, products, orders, ai, returns, reviews, favorites, coupons, stock, cargo, analytics
 
 settings = get_settings()
 
@@ -100,6 +100,9 @@ api_router.include_router(returns.router)
 api_router.include_router(reviews.router)
 api_router.include_router(favorites.router)
 api_router.include_router(coupons.router)
+api_router.include_router(stock.router)
+api_router.include_router(cargo.router)
+api_router.include_router(analytics.router)
 
 # Yeni standart: /api/v1
 app.include_router(api_router, prefix="/api/v1")
