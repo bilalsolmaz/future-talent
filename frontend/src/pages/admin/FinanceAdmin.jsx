@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   DollarSign, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   Loader2, BarChart3, Calendar, Banknote,
-  Clock, CheckCircle2, XCircle, Wallet, Receipt
+  Clock, CheckCircle2, XCircle, Wallet, Receipt, Sparkles, AlertCircle
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -133,6 +133,8 @@ const DonutChart = ({ segments, size = 150 }) => {
 const FinanceAdmin = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [chartDays, setChartDays] = useState(30);
 
@@ -142,16 +144,33 @@ const FinanceAdmin = () => {
 
   const fetchData = async () => {
     try {
-      const [ordersRes, productsRes] = await Promise.all([
+      setAnalyticsLoading(true);
+      const [ordersRes, productsRes, analyticsRes] = await Promise.all([
         api.get('/siparisler/'),
-        api.get('/urunler/')
+        api.get('/urunler/'),
+        api.get('/analytics/insights/latest?periyot=aylik').catch(() => ({ data: null }))
       ]);
       setOrders(ordersRes.data);
       setProducts(productsRes.data);
+      setAnalyticsData(analyticsRes.data);
     } catch (error) {
       console.error('Finans verileri yüklenemedi:', error);
     } finally {
       setIsLoading(false);
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const handleTriggerAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await api.post('/analytics/insights/trigger?periyot=aylik');
+      setAnalyticsData(res.data);
+    } catch (error) {
+      console.error("Analitik hesaplama tetiklenirken hata:", error);
+      alert("Ajan raporu hesaplayamadı, lütfen tekrar deneyin.");
+    } finally {
+      setAnalyticsLoading(false);
     }
   };
 
@@ -265,6 +284,97 @@ const FinanceAdmin = () => {
 
   return (
     <div className="space-y-6">
+      {/* AnalyticsAgent Aylık Finans Rapor Özeti */}
+      <div className="bg-white rounded-xl border border-violet-150 p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute -right-6 -bottom-6 opacity-5 rotate-12 text-violet-600">
+          <Sparkles size={120} />
+        </div>
+        
+        {analyticsLoading ? (
+          /* Skeleton Loader */
+          <div className="space-y-4 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="h-5 bg-gray-200 rounded w-1/4" />
+              <div className="h-4 bg-gray-200 rounded w-16" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="h-16 bg-gray-100 rounded-lg p-3" />
+              ))}
+            </div>
+          </div>
+        ) : analyticsData ? (
+          /* Rapor Görünümü */
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">AnalyticsAgent Aylık Rapor Özeti</h3>
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    Hesaplanma Zamanı: {new Date(analyticsData.hesaplanma).toLocaleDateString('tr-TR')} {new Date(analyticsData.hesaplanma).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleTriggerAnalytics}
+                className="text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-lg transition-colors border border-violet-200"
+              >
+                Raporu Yenile (Ajanı Tetikle)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1">
+              <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-bold">Toplam Ciro</span>
+                <span className="text-lg font-extrabold text-slate-800 mt-1 block">
+                  ₺{Number(analyticsData.toplam_satis).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-bold">Sipariş Sayısı</span>
+                <span className="text-lg font-extrabold text-slate-800 mt-1 block">{analyticsData.siparis_sayisi} adet</span>
+              </div>
+              <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-bold">Yeni Müşteri</span>
+                <span className="text-lg font-extrabold text-slate-800 mt-1 block">{analyticsData.yeni_musteri} kişi</span>
+              </div>
+              <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-bold">İade Oranı</span>
+                <span className="text-lg font-extrabold text-slate-800 mt-1 block">%{Number(analyticsData.iade_orani).toFixed(1)}</span>
+              </div>
+            </div>
+            
+            <p className="text-[11px] text-slate-500 italic">
+              💡 Bu veriler AnalyticsAgent tarafından son 30 günlük ciro, sipariş ve müşteri hareketleri analiz edilerek pre-aggregation pattern ile yüksek performanslı hesaplanmıştır.
+            </p>
+          </div>
+        ) : (
+          /* Empty State - Tetikleme Butonlu */
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 animate-pulse">
+                <AlertCircle size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Aylık Analitik Rapor Bulunamadı</h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Veritabanında son 30 güne dair pre-aggregated analitik rapor mevcut değil. Ajanı manuel tetikleyerek raporu anında hesaplayabilirsiniz.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleTriggerAnalytics}
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-violet-600 hover:bg-violet-750 text-white font-bold text-xs rounded-xl shadow-md shadow-violet-500/10 transition-colors"
+            >
+              <Sparkles size={14} /> Hemen Hesapla (Ajanı Tetikle)
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Stat Kartları */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 shadow-lg shadow-emerald-500/20 text-white">

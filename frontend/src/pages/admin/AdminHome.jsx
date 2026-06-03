@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, Package, ShoppingCart, Tags,
   ArrowUpRight, Loader2, DollarSign, BarChart3, Clock, CheckCircle2, XCircle,
-  Truck, PackageCheck, AlertCircle, Calendar
+  Truck, PackageCheck, AlertCircle, Calendar, Sparkles
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -93,6 +93,8 @@ const AdminHome = () => {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [stockAlerts, setStockAlerts] = useState([]);
+  const [resolvingAlerts, setResolvingAlerts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [chartDays, setChartDays] = useState(7);
 
@@ -102,14 +104,16 @@ const AdminHome = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [ordersRes, productsRes, categoriesRes] = await Promise.all([
+      const [ordersRes, productsRes, categoriesRes, alertsRes] = await Promise.all([
         api.get('/siparisler/'),
         api.get('/urunler/'),
-        api.get('/kategoriler/')
+        api.get('/kategoriler/'),
+        api.get('/stock/alerts/?durum=acik').catch(() => ({ data: [] }))
       ]);
 
       setOrders(ordersRes.data);
       setProducts(productsRes.data);
+      setStockAlerts(alertsRes.data || []);
 
       const allOrders = ordersRes.data;
       const totalRevenue = allOrders
@@ -135,6 +139,30 @@ const AdminHome = () => {
       console.error('Dashboard verileri yüklenemedi:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResolveAlert = async (alertId) => {
+    // Optimistic Update: Hemen UI'dan kaldır
+    const previousAlerts = [...stockAlerts];
+    setStockAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    setResolvingAlerts(prev => ({ ...prev, [alertId]: true }));
+
+    try {
+      await api.patch(`/stock/alerts/${alertId}/resolve`, { durum: 'kapatildi' });
+      // Başarılı olduğunda dashboard verilerini (stok sayılarını vb.) güncelle
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Stok uyarısı kapatılırken hata oluştu:", error);
+      alert("Uyarı kapatılamadı, lütfen tekrar deneyin.");
+      // Hata durumunda state'i eski haline geri getir
+      setStockAlerts(previousAlerts);
+    } finally {
+      setResolvingAlerts(prev => {
+        const copy = { ...prev };
+        delete copy[alertId];
+        return copy;
+      });
     }
   };
 
@@ -348,35 +376,83 @@ const AdminHome = () => {
           </div>
         </div>
 
-        {/* Düşük Stoklu Ürünler */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between p-5 border-b border-gray-100">
-            <h3 className="text-base font-bold text-gray-900">Düşük Stoklu Ürünler</h3>
+        {/* AI Destekli Stok Uyarıları & Önerileri */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
+          <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-slate-50">
+            <div className="flex items-center gap-2">
+              <Sparkles size={18} className="text-violet-600 animate-pulse" />
+              <h3 className="text-base font-bold text-gray-900">AI Stok Uyarıları & Tedarik Önerileri</h3>
+            </div>
             <Link to="/admin/urunler" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1">
-              Tümünü Gör <ArrowUpRight size={14} />
+              Ürünleri Yönet <ArrowUpRight size={14} />
             </Link>
           </div>
-          <div className="divide-y divide-gray-50">
-            {products.filter(p => p.stok <= 10).slice(0, 5).map(product => (
-              <div key={product.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Package size={16} className="text-gray-500" />
+          <div className="divide-y divide-gray-100 overflow-y-auto flex-1 max-h-[360px]">
+            {isLoading ? (
+              /* Skeleton Loader */
+              [1, 2].map(n => (
+                <div key={n} className="p-5 space-y-3 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    <div className="h-4 bg-gray-200 rounded-full w-16" />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{product.isim}</p>
-                    <p className="text-xs text-gray-400">₺{Number(product.fiyat).toLocaleString('tr-TR')}</p>
+                  <div className="h-12 bg-gray-100 rounded w-full" />
+                  <div className="h-8 bg-gray-200 rounded w-24 ml-auto" />
+                </div>
+              ))
+            ) : stockAlerts.length > 0 ? (
+              stockAlerts.slice(0, 5).map(alert => (
+                <div key={alert.id} className="p-5 hover:bg-gray-50/50 transition-colors space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 flex-shrink-0 mt-0.5">
+                        <AlertCircle size={18} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900">{alert.urun?.isim || `Ürün #${alert.urun_id}`}</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Mevcut Stok: <span className="font-semibold text-red-600">{alert.mevcut_stok}</span> / Eşik Miktarı: {alert.esik}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 uppercase tracking-wider scale-90">
+                      Kritik Stok
+                    </span>
+                  </div>
+
+                  {alert.oneri && (
+                    <div className="relative rounded-lg bg-gradient-to-br from-violet-50 to-indigo-50/70 border border-violet-100 p-3.5 text-xs text-slate-700 font-medium">
+                      <div className="absolute top-2 right-2 flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-100/80 px-1.5 py-0.5 rounded shadow-sm select-none">
+                        <Sparkles size={8} /> AI
+                      </div>
+                      <p className="italic text-slate-800 leading-relaxed pr-8 font-serif">"{alert.oneri}"</p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      onClick={() => handleResolveAlert(alert.id)}
+                      disabled={resolvingAlerts[alert.id]}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                    >
+                      {resolvingAlerts[alert.id] ? "Kapatılıyor..." : "Çözüldü Olarak İşaretle"}
+                    </button>
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                  product.stok === 0 ? 'bg-red-100 text-red-700' : product.stok <= 5 ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {product.stok === 0 ? 'Tükendi' : `${product.stok} adet`}
-                </span>
+              ))
+            ) : (
+              /* Empty State */
+              <div className="p-8 text-center flex flex-col items-center justify-center space-y-3 h-[250px]">
+                <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Aktif Stok Uyarısı Yok</p>
+                  <p className="text-xs text-gray-500 mt-1 max-w-[280px] mx-auto">
+                    Tüm ürün stokları güvenli eşik değerinin üzerindedir. AI operasyon uzmanı bir sorun tespit etmedi.
+                  </p>
+                </div>
               </div>
-            ))}
-            {products.filter(p => p.stok <= 10).length === 0 && (
-              <div className="p-8 text-center text-gray-400 text-sm">Tüm ürünlerde yeterli stok var.</div>
             )}
           </div>
         </div>

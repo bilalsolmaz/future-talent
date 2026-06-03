@@ -3,10 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   Package, Clock, CheckCircle2, XCircle, RotateCcw, 
   ChevronDown, ChevronUp, AlertTriangle, Send, FileText,
-  PartyPopper, ShieldX, Info, Settings, Lock, User as UserIcon, Save
+  PartyPopper, ShieldX, Info, Settings, Lock, User as UserIcon, Save,
+  Truck
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
+import CargoTimeline from '../../components/cargo/CargoTimeline';
 
 const sebepOptions = [
   { value: 'hasarli', label: 'Hasarlı / Kırık Ürün' },
@@ -44,6 +46,42 @@ const Profile = () => {
   const [returnSubmitting, setReturnSubmitting] = useState(false);
   const [returnSuccess, setReturnSuccess] = useState('');
   const [returnError, setReturnError] = useState('');
+
+  // CargoAgent Takip State'leri
+  const [activeCargoId, setActiveCargoId] = useState(null);
+  const [cargoTrackings, setCargoTrackings] = useState({});
+  const [cargoLoadings, setCargoLoadings] = useState({});
+  const [cargoErrors, setCargoErrors] = useState({});
+
+  const toggleCargoTracking = async (orderId) => {
+    if (activeCargoId === orderId) {
+      setActiveCargoId(null);
+      return;
+    }
+
+    setActiveCargoId(orderId);
+
+    if (cargoTrackings[orderId]) {
+      return;
+    }
+
+    setCargoLoadings(prev => ({ ...prev, [orderId]: true }));
+    setCargoErrors(prev => ({ ...prev, [orderId]: null }));
+
+    try {
+      const res = await api.get(`/cargo/track/${orderId}`);
+      setCargoTrackings(prev => ({ ...prev, [orderId]: res.data }));
+    } catch (err) {
+      console.error("Kargo verisi yüklenemedi:", err);
+      if (err.response?.status === 404) {
+        setCargoErrors(prev => ({ ...prev, [orderId]: "Kargo takip kaydı henüz mevcut değil." }));
+      } else {
+        setCargoErrors(prev => ({ ...prev, [orderId]: "Kargo bilgisi alınamadı." }));
+      }
+    } finally {
+      setCargoLoadings(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -244,29 +282,60 @@ const Profile = () => {
                         <p className="text-sm text-surface-900">{order.adres}</p>
                       </div>
 
-                      {/* İade Talebi Oluştur Butonu */}
-                      {canReturn(order) && (
-                        <button
-                          onClick={() => {
-                            setShowReturnForm(showReturnForm === order.id ? null : order.id);
-                            setReturnCategory('');
-                            setReturnDescription('');
-                            setReturnError('');
-                          }}
-                          className="flex items-center gap-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-2 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          <RotateCcw size={14} />
-                          {showReturnForm === order.id ? 'Kapat' : 'İade Talebi Oluştur'}
-                          {showReturnForm === order.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                      )}
-                      {/* Bekleyen iade varsa bilgi */}
-                      {returns.some(r => r.siparis_id === order.id && r.durum === 'bekliyor') && (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg">
-                          <Clock size={12} /> İade talebi inceleniyor
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-shrink-0">
+                        {/* Kargo Takip Butonu */}
+                        {(order.durum === 'kargolandi' || order.durum === 'teslim_edildi') && (
+                          <button
+                            type="button"
+                            onClick={() => toggleCargoTracking(order.id)}
+                            className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors"
+                          >
+                            <Truck size={14} />
+                            {activeCargoId === order.id ? 'Takibi Gizle' : 'Kargo Takip'}
+                            {activeCargoId === order.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </button>
+                        )}
+
+                        {/* İade Talebi Oluştur Butonu */}
+                        {canReturn(order) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowReturnForm(showReturnForm === order.id ? null : order.id);
+                              setReturnCategory('');
+                              setReturnDescription('');
+                              setReturnError('');
+                            }}
+                            className="flex items-center gap-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-2 rounded-lg transition-colors"
+                          >
+                            <RotateCcw size={14} />
+                            {showReturnForm === order.id ? 'Kapat' : 'İade Talebi Oluştur'}
+                            {showReturnForm === order.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </button>
+                        )}
+                        {/* Bekleyen iade varsa bilgi */}
+                        {returns.some(r => r.siparis_id === order.id && r.durum === 'bekliyor') && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg">
+                            <Clock size={12} /> İade talebi inceleniyor
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Kargo Accordion Detayı */}
+                    {activeCargoId === order.id && (
+                      <div className="mt-4 p-5 bg-white border border-surface-200 rounded-xl space-y-4 shadow-sm animate-fadeIn">
+                        <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <Truck size={14} className="text-blue-600" /> Kargo Durumu (CargoAgent Canlı Takip)
+                        </h4>
+                        <CargoTimeline
+                          order={order}
+                          tracking={cargoTrackings[order.id]}
+                          isLoading={cargoLoadings[order.id]}
+                          error={cargoErrors[order.id]}
+                        />
+                      </div>
+                    )}
 
                     {/* İade Formu */}
                     {showReturnForm === order.id && (

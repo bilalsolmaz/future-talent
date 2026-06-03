@@ -5,6 +5,7 @@ import {
   FileText, Calendar, Hash, CreditCard, MessageSquare, Eye
 } from 'lucide-react';
 import api from '../../services/api';
+import CargoTimeline from '../../components/cargo/CargoTimeline';
 
 const statusConfig = {
   'bekliyor': { label: 'Bekliyor', bg: 'bg-amber-100', text: 'text-amber-700', icon: Clock, color: '#f59e0b' },
@@ -71,6 +72,11 @@ const OrdersAdmin = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
 
+  // CargoAgent Takip State'leri
+  const [cargoTracking, setCargoTracking] = useState(null);
+  const [cargoLoading, setCargoLoading] = useState(false);
+  const [cargoError, setCargoError] = useState(null);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -86,6 +92,29 @@ const OrdersAdmin = () => {
     }
   };
 
+  const handleViewOrder = async (order) => {
+    setSelectedOrder(order);
+    setCargoTracking(null);
+    setCargoError(null);
+
+    if (order.durum === 'kargolandi' || order.durum === 'teslim_edildi') {
+      setCargoLoading(true);
+      try {
+        const response = await api.get(`/cargo/track/${order.id}`);
+        setCargoTracking(response.data);
+      } catch (error) {
+        console.error("Kargo detayları yüklenemedi:", error);
+        if (error.response?.status === 404) {
+          setCargoError("Kargo takip kaydı henüz oluşturulmamış veya mevcut değil.");
+        } else {
+          setCargoError("Kargo durum bilgisi sağlayıcıdan alınamadı.");
+        }
+      } finally {
+        setCargoLoading(false);
+      }
+    }
+  };
+
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await api.patch(`/siparisler/${orderId}/durum`, { durum: newStatus });
@@ -93,6 +122,13 @@ const OrdersAdmin = () => {
       // Eğer detay modalı açıksa, bilgileri güncelle
       if (selectedOrder?.id === orderId) {
         setSelectedOrder(prev => ({ ...prev, durum: newStatus }));
+        // Eğer durum kargolandı olarak değiştiyse kargo verisini tetikle/yenile
+        if (newStatus === 'kargolandi' || newStatus === 'teslim_edildi') {
+          handleViewOrder({ ...selectedOrder, durum: newStatus });
+        } else {
+          setCargoTracking(null);
+          setCargoError(null);
+        }
       }
     } catch (error) {
       alert('Durum güncellenirken hata oluştu.');
@@ -187,7 +223,7 @@ const OrdersAdmin = () => {
                   </td>
                   <td className="p-4 text-center">
                     <button
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={() => handleViewOrder(order)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
                     >
                       <Eye size={14} /> Görüntüle
@@ -279,6 +315,21 @@ const OrdersAdmin = () => {
                 </h3>
                 <p className="text-sm text-gray-700 leading-relaxed">{selectedOrder.adres}</p>
               </div>
+
+              {/* CargoAgent Kargo Takip Timeline */}
+              {(selectedOrder.durum === 'kargolandi' || selectedOrder.durum === 'teslim_edildi' || cargoTracking) && (
+                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2">
+                    <Truck size={16} className="text-blue-600 animate-bounce" style={{ animationDuration: '3s' }} /> Kargo Takip & Gecikme Analizi (CargoAgent)
+                  </h3>
+                  <CargoTimeline 
+                    order={selectedOrder} 
+                    tracking={cargoTracking} 
+                    isLoading={cargoLoading} 
+                    error={cargoError} 
+                  />
+                </div>
+              )}
 
               {/* Sipariş Notu */}
               {selectedOrder.notlar && (
