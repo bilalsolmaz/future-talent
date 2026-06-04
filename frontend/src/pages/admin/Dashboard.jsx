@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Tags, ShoppingCart, Store, LogOut, 
-  ChevronLeft, ChevronRight, Menu, X, DollarSign, RotateCcw
+  ChevronLeft, ChevronRight, Menu, X, DollarSign, RotateCcw, Plug
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -20,6 +20,7 @@ const AdminLayout = () => {
     { name: 'Ürünler', path: '/admin/urunler', icon: Package },
     { name: 'Kategoriler', path: '/admin/kategoriler', icon: Tags },
     { name: 'Finans', path: '/admin/finans', icon: DollarSign },
+    { name: 'Entegrasyonlar', path: '/admin/entegrasyonlar', icon: Plug },
   ];
 
   const handleLogout = () => {

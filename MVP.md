@@ -38,7 +38,7 @@ MVP, bu iki katmanın birlikte çalışan, test edilebilir ve deploy edilebilir 
 
 ---
 
-## ✅ Katman 2 — AI Otomasyon Özellikleri (Hackathon)
+## ✅ Katman 2 — AI Otomasyon Özellikleri
 
 ### 4. Müşteri İletişim Ajanı — CustomerAgent
 - [ ] `/api/agent/chat` endpoint — doğal dil sorgu arayüzü
@@ -162,4 +162,4 @@ Orchestrator: hangi agent'ın devreye gireceğini kullanıcı niyetine göre bel
 
 ---
 
-*LocalShop MVP — 2025–2026*
+*LocalShop MVP — 2026–2027*

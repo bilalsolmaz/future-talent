@@ -257,6 +257,6 @@ AnalyticsAgent → Satış metrikleri pre-aggregation
 
 ## 📄 Lisans
 
-Bu proje eğitim ve hackathon amaçlı geliştirilmiştir.
+MIT Lisansı
 
-*LocalShop — 2025–2026*
+*LocalShop — 2026–2027*

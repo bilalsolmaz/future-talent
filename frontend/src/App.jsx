@@ -22,6 +22,7 @@ import OrdersAdmin from './pages/admin/OrdersAdmin';
 import CategoriesAdmin from './pages/admin/CategoriesAdmin';
 import FinanceAdmin from './pages/admin/FinanceAdmin';
 import ReturnsAdmin from './pages/admin/ReturnsAdmin';
+import IntegrationsAdmin from './pages/admin/IntegrationsAdmin';
 import ChatbotWidget from './components/ChatbotWidget';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <Route path="siparisler" element={<OrdersAdmin />} />
             <Route path="finans" element={<FinanceAdmin />} />
             <Route path="iadeler" element={<ReturnsAdmin />} />
+            <Route path="entegrasyonlar" element={<IntegrationsAdmin />} />
           </Route>
         </Route>
 

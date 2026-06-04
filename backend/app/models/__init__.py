@@ -21,6 +21,7 @@ from app.models.conversation import AgentKonusma
 from app.models.stock_alert import StokUyarisi
 from app.models.briefing import BriefingGecmisi
 from app.models.analytics_summary import AnalitikOzet
+from app.models.system_setting import SystemSetting
 
 # __all__: "from app.models import *" yapıldığında
 # sadece buradaki isimler dışarı aktarılır
@@ -29,5 +30,5 @@ __all__ = [
     "Siparis", "SiparisKalemi", "Iade",
     "Yorum", "Favori", "Kupon",
     "KargoTakip", "AgentKonusma", "StokUyarisi",
-    "BriefingGecmisi", "AnalitikOzet"
+    "BriefingGecmisi", "AnalitikOzet", "SystemSetting"
 ]

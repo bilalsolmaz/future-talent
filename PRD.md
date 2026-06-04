@@ -473,4 +473,4 @@ CARGO_CHECK_INTERVAL_HOURS=2
 
 ---
 
-*LocalShop PRD v2.0 — 2025–2026*
+*LocalShop PRD v2.0 — 2026–2027*

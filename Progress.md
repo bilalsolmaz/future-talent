@@ -199,4 +199,4 @@
 
 ---
 
-*LocalShop Progress.md — 2025–2026*
+*LocalShop Progress.md — 2026–2027*

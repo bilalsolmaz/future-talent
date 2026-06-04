@@ -130,4 +130,4 @@ Orchestration:
 
 ---
 
-*LocalShop tech-stack.md — 2025–2026*
+*LocalShop tech-stack.md — 2026–2027*
