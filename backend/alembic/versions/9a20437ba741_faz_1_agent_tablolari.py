@@ -82,6 +82,7 @@ def upgrade() -> None:
     )
     op.add_column('siparisler', sa.Column('kargo_no', sa.String(length=100), nullable=True))
     op.add_column('urunler', sa.Column('stok_esigi', sa.Integer(), nullable=True))
+    op.add_column('urunler', sa.Column('ozellikler', sa.JSON(), nullable=True))
     op.execute('UPDATE urunler SET stok_esigi = 10')
     op.alter_column('urunler', 'stok_esigi', nullable=False)
     # ### end Alembic commands ###

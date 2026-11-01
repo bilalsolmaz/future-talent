@@ -187,7 +187,7 @@ const IntegrationsAdmin = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiFetch('/api/v1/settings/');
+      const data = await apiFetch('/settings/');
       setGruplar(data.gruplar);
 
       // Form data'yı hazırla
@@ -226,7 +226,7 @@ const IntegrationsAdmin = () => {
         deger,
       }));
 
-      const data = await apiFetch('/api/v1/settings/', {
+      const data = await apiFetch('/settings/', {
         method: 'PUT',
         body: JSON.stringify({ ayarlar }),
       });
@@ -246,7 +246,7 @@ const IntegrationsAdmin = () => {
     setTestingEmail(true);
     setTestResults(prev => ({ ...prev, email: null }));
     try {
-      const result = await apiFetch('/api/v1/settings/test-email', { method: 'POST' });
+      const result = await apiFetch('/settings/test-email', { method: 'POST' });
       setTestResults(prev => ({ ...prev, email: { success: true, message: result.mesaj } }));
     } catch (err) {
       setTestResults(prev => ({ ...prev, email: { success: false, message: err.message } }));
@@ -260,7 +260,7 @@ const IntegrationsAdmin = () => {
     setTestingCargo(true);
     setTestResults(prev => ({ ...prev, cargo: null }));
     try {
-      const result = await apiFetch('/api/v1/settings/test-cargo', { method: 'POST' });
+      const result = await apiFetch('/settings/test-cargo', { method: 'POST' });
       setTestResults(prev => ({ ...prev, cargo: { success: true, message: result.mesaj } }));
     } catch (err) {
       setTestResults(prev => ({ ...prev, cargo: { success: false, message: err.message } }));
